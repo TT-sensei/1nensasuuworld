@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ひき算どうくつ - 算数ワールド</title>
+    <style>
+        /* どうくつのテーマカラー（紫と黒） */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background-color: #f3e5f5; margin: 0; padding: 10px; color: #333; }
+        h1 { color: #6a1b9a; font-size: 1.6rem; margin-bottom: 5px; text-shadow: 1px 1px 0px #fff; }
+        .subtitle { color: #8e24aa; font-size: 1rem; font-weight: bold; margin-bottom: 20px; }
+
+        /* バトルシーン */
+        .battle-scene { display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 3.5rem; height: 80px; margin-bottom: 10px; background: #4a148c; border-radius: 15px; padding: 10px; border: 3px solid #7b1fa2; box-shadow: inset 0 0 10px #000; }
+        #player { filter: drop-shadow(0 0 5px #fff); }
+        #magic { font-size: 2.5rem; display: inline-block; width: 40px; }
+        
+        /* 攻撃とダメージのアニメーション */
+        @keyframes shoot {
+            0% { transform: translateX(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(80px) scale(2) rotate(180deg); opacity: 0; }
+        }
+        .magic-anim { animation: shoot 0.4s ease-out; }
+        
+        @keyframes damage {
+            0%, 100% { transform: translateX(0); filter: brightness(1); }
+            25% { transform: translateX(-10px); filter: brightness(2) drop-shadow(0 0 10px yellow); }
+            75% { transform: translateX(10px); filter: brightness(2) drop-shadow(0 0 10px yellow); }
+        }
+        .monster-damage { animation: damage 0.4s ease-out; }
+
+        /* 問題表示エリア */
+        .question-box { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 6px 0 #ce93d8; margin-bottom: 25px; border: 4px solid #ab47bc; }
+        .question-text { font-size: 2.5rem; font-weight: bold; color: #4a148c; margin-bottom: 10px; letter-spacing: 3px; }
+
+        /* 選択肢ボタン */
+        .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 400px; margin: 0 auto 30px; }
+        .btn-choice { font-size: 1.8rem; font-weight: bold; padding: 15px; border: none; border-radius: 12px; cursor: pointer; background: #fff; color: #333; box-shadow: 0 5px 0 #e1bee7; border: 2px solid #f3e5f5; transition: transform 0.1s, box-shadow 0.1s; }
+        .btn-choice:active { transform: translateY(5px); box-shadow: 0 0 0 #e1bee7; }
+        
+        /* 戻るボタン */
+        .btn-back { display: inline-block; padding: 12px 20px; background: #424242; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 0 #212121; margin-top: 10px; }
+        .btn-back:active { transform: translateY(4px); box-shadow: 0 0 0 #212121; }
+
+        /* フィードバック */
+        #feedback { font-size: 1.5rem; font-weight: bold; height: 30px; margin-bottom: 10px; }
+        .correct { color: #8e24aa; animation: pop 0.3s ease-out; }
+        .wrong { color: #757575; animation: shake 0.3s ease-in-out; }
+
+        @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    </style>
+</head>
+<body>
+
+    <h1>🦇 ひき算どうくつ</h1>
+    <div class="subtitle">ひかりの まほうで やっつけろ！</div>
+
+    <div class="battle-scene">
+        <div id="player">🧙‍♀️</div>
+        <div id="magic"></div>
+        <div id="monster">👻</div>
+    </div>
+
+    <div id="feedback"></div>
+
+    <div class="question-box">
+        <div class="question-text" id="q-text">もんだい...</div>
+    </div>
+
+    <div class="choices-grid" id="choices-area"></div>
+
+    <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
+
+    <script src="system.js"></script>
+
+    <script>
+        let currentAnswer = 0;
+        let isAnswering = false;
+
+        const monsters = ["🦇", "👻", "🕷️", "💀", "👾"];
+
+        function generateQuestion() {
+            isAnswering = false;
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('feedback').className = "";
+            document.getElementById('magic').textContent = "";
+            document.getElementById('magic').className = "";
+            document.getElementById('monster').className = ""; 
+            
+            document.getElementById('monster').textContent = monsters[Math.floor(Math.random() * monsters.length)];
+
+            // ひき算の作成 (引かれる数は2〜18、引く数は1〜9)
+            let a = Math.floor(Math.random() * 17) + 2; 
+            let b = Math.floor(Math.random() * 9) + 1;
+            
+            // 必ず a > b になるように調整（答えがマイナスにならないように）
+            if (a <= b) {
+                a = b + Math.floor(Math.random() * 9) + 1;
+            }
+            
+            currentAnswer = a - b;
+
+            document.getElementById('q-text').textContent = `${a} － ${b} ＝ ❓`;
+
+            generateChoices(currentAnswer);
+        }
+
+        function generateChoices(correct) {
+            let choices = new Set([correct]);
+            while (choices.size < 4) {
+                let offset = Math.floor(Math.random() * 5) - 2;
+                let wrongAnswer = correct + offset;
+                if (wrongAnswer >= 0 && wrongAnswer !== correct) {
+                    choices.add(wrongAnswer);
+                } else {
+                    choices.add(Math.floor(Math.random() * 18));
+                }
+            }
+            let choiceArray = Array.from(choices).sort(() => Math.random() - 0.5);
+
+            const choicesArea = document.getElementById('choices-area');
+            choicesArea.innerHTML = ""; 
+            choiceArray.forEach(num => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-choice';
+                btn.textContent = num;
+                btn.onclick = () => checkAnswer(num);
+                choicesArea.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            if (isAnswering) return;
+            const feedback = document.getElementById('feedback');
+
+            if (selected === currentAnswer) {
+                isAnswering = true;
+                
+                // 光の魔法アニメーション！
+                document.getElementById('magic').textContent = "✨";
+                document.getElementById('magic').className = "magic-anim";
+                
+                setTimeout(() => {
+                    document.getElementById('monster').className = "monster-damage";
+                }, 200);
+
+                feedback.textContent = "⭕ ピカーン！ (+10 EXP)";
+                feedback.className = "correct";
+                
+                let result = addRewards(10, 5); 
+                if (result.leveledUp) {
+                    setTimeout(() => alert(`🎉 レベルアップ！ Lv.${result.newLevel}になったよ！`), 100);
+                }
+
+                setTimeout(generateQuestion, 800);
+            } else {
+                feedback.textContent = "❌ がんばれ！ もういちど！";
+                feedback.className = "wrong";
+            }
+        }
+
+        window.onload = generateQuestion;
+    </script>
+</body>
+</html>
