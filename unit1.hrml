@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>はじまりの村 - 算数ワールド</title>
+    <style>
+        /* 村のテーマカラー（緑） */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background-color: #f1f8e9; margin: 0; padding: 10px; color: #333; }
+        h1 { color: #33691e; font-size: 1.5rem; margin-bottom: 5px; }
+        .subtitle { color: #558b2f; font-size: 0.9rem; font-weight: bold; margin-bottom: 20px; }
+
+        /* 問題表示エリア */
+        .question-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 6px 0 #c5e1a5; margin-bottom: 20px; border: 3px solid #8bc34a; }
+        .question-text { font-size: 1.2rem; font-weight: bold; color: #e65100; margin-bottom: 15px; }
+        .question-content { font-size: 2.5rem; letter-spacing: 5px; margin-bottom: 15px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
+
+        /* 選択肢ボタン（4択） */
+        .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 400px; margin: 0 auto 30px; }
+        .btn-choice { font-size: 1.8rem; font-weight: bold; padding: 15px; border: none; border-radius: 12px; cursor: pointer; background: #fff; color: #333; box-shadow: 0 5px 0 #ccc; border: 2px solid #eee; transition: transform 0.1s, box-shadow 0.1s; }
+        .btn-choice:active { transform: translateY(5px); box-shadow: 0 0 0 #ccc; }
+        
+        /* 戻るボタン */
+        .btn-back { display: inline-block; padding: 12px 20px; background: #757575; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 0 #424242; margin-top: 10px; }
+        .btn-back:active { transform: translateY(4px); box-shadow: 0 0 0 #424242; }
+
+        /* 正解・不正解のアニメーション用 */
+        #feedback { font-size: 1.5rem; font-weight: bold; height: 30px; margin-bottom: 10px; }
+        .correct { color: #4caf50; animation: pop 0.3s ease-out; }
+        .wrong { color: #f44336; animation: shake 0.3s ease-in-out; }
+
+        @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    </style>
+</head>
+<body>
+
+    <h1>🔰 はじまりの村</h1>
+    <div class="subtitle">1〜10の かずを マスターしよう！</div>
+
+    <div id="feedback"></div>
+
+    <div class="question-box">
+        <div class="question-text" id="q-text">もんだい を つくっています...</div>
+        <div class="question-content" id="q-content"></div>
+    </div>
+
+    <div class="choices-grid" id="choices-area">
+        </div>
+
+    <a href="../index.html" class="btn-back">⬅️ マップにもどる</a>
+
+    <script src="../js/system.js"></script>
+
+    <script>
+        // 現在の正解を覚えておく変数
+        let currentAnswer = 0;
+
+        // 問題をランダムに作る関数
+        function generateQuestion() {
+            // フィードバック表示をリセット
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('feedback').className = "";
+
+            // 出題パターン（0: 数える, 1: 順番, 2: 逆の順番）
+            const type = Math.floor(Math.random() * 3);
+            let qText = "";
+            let qContent = "";
+
+            if (type === 0) {
+                // パターン1：絵文字を数える問題
+                const emojis = ["🍎", "🐱", "🚗", "⭐", "⚽", "🍓", "🦋"];
+                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                currentAnswer = Math.floor(Math.random() * 10) + 1; // 1〜10
+                
+                qText = "ぜんぶで いくつ あるかな？";
+                qContent = emoji.repeat(currentAnswer);
+
+            } else if (type === 1) {
+                // パターン2：数の順番（増える）
+                const start = Math.floor(Math.random() * 7) + 1; // 1〜7
+                currentAnswer = start + 2;
+                
+                qText = "「？」に はいる かずは なに？";
+                qContent = `${start} → ${start + 1} → ？ → ${start + 3}`;
+
+            } else {
+                // パターン3：数の順番（減る / 少しだけ難しい）
+                const start = Math.floor(Math.random() * 6) + 5; // 5〜10
+                currentAnswer = start - 1;
+                
+                qText = "「？」に はいる かずは なに？";
+                qContent = `${start} → ？ → ${start - 2} → ${start - 3}`;
+            }
+
+            // 画面に問題を表示
+            document.getElementById('q-text').textContent = qText;
+            document.getElementById('q-content').textContent = qContent;
+
+            // 選択肢（ダミーの答え）を生成
+            generateChoices(currentAnswer);
+        }
+
+        // 4つの選択肢ボタンを作る関数
+        function generateChoices(correct) {
+            let choices = new Set([correct]); // 正解を最初に入れる（Setは重複を防ぐ箱）
+
+            // 選択肢が4つになるまで、ランダムな数字（1〜10）を追加
+            while (choices.size < 4) {
+                let randomWrong = Math.floor(Math.random() * 10) + 1;
+                choices.add(randomWrong);
+            }
+
+            // 順番をバラバラにする
+            let choiceArray = Array.from(choices);
+            choiceArray.sort(() => Math.random() - 0.5);
+
+            // HTMLにボタンを配置する
+            const choicesArea = document.getElementById('choices-area');
+            choicesArea.innerHTML = ""; // 一度空にする
+
+            choiceArray.forEach(num => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-choice';
+                btn.textContent = num;
+                btn.onclick = () => checkAnswer(num);
+                choicesArea.appendChild(btn);
+            });
+        }
+
+        // 答え合わせをする関数
+        function checkAnswer(selected) {
+            const feedback = document.getElementById('feedback');
+
+            if (selected === currentAnswer) {
+                // 🎉 正解の処理
+                feedback.textContent = "⭕ だいせいかい！ (+10 EXP, +5 ⚡)";
+                feedback.className = "correct";
+                
+                // 【超重要】system.jsの報酬システムを呼び出す！
+                let result = addRewards(10, 5); 
+                
+                // レベルアップした場合はお知らせ
+                if (result.leveledUp) {
+                    setTimeout(() => alert(`🎉 レベルアップ！ Lv.${result.newLevel}になったよ！\nマップにもどって 街をそだてよう！`), 100);
+                }
+
+                // 1.5秒後に次の問題へ
+                setTimeout(generateQuestion, 1500);
+
+            } else {
+                // ❌ 不正解の処理
+                feedback.textContent = "❌ おしい！もういちど！";
+                feedback.className = "wrong";
+            }
+        }
+
+        // 画面が開いた時に最初の問題を作る
+        window.onload = generateQuestion;
+    </script>
+</body>
+</html>
