@@ -3,56 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>算数ワールド 〜すうじの力で世界を再生しよう〜</title>
+    <title>算数ワールド</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background-color: #f0f8ff; margin: 0; padding: 10px; }
-        h1 { font-size: 1.5rem; color: #333; }
+        /* 全体のベース設定 */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background-color: #e0f7fa; margin: 0; padding: 10px; color: #333; }
+        h1 { font-size: 1.4rem; color: #006064; margin-bottom: 15px; text-shadow: 1px 1px 2px #fff; }
         
         /* ステータスバー（画面上部） */
-        .status-bar { display: flex; justify-content: space-around; background: #fff; padding: 15px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; font-weight: bold; }
+        .status-bar { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: left; }
+        .status-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; }
+        .energy-box { color: #f57c00; font-weight: bold; font-size: 1.2rem; text-align: right; margin-top: 5px; }
         
-        /* 街の表示エリア（画面中央） */
-        .city-view { width: 100%; max-width: 400px; height: 250px; background: #e0e0e0; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; border: 3px solid #ccc; }
+        /* 経験値ゲージ（視覚的なモチベーション） */
+        .exp-bar-bg { width: 100%; background: #eeeeee; border-radius: 10px; height: 12px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+        .exp-bar-fill { height: 100%; background: linear-gradient(90deg, #4caf50, #8bc34a); width: 0%; transition: width 0.4s ease-out; }
+        .exp-text { font-size: 0.8rem; color: #666; text-align: right; margin-top: 4px; }
+
+        /* 街の表示エリア（メインビジュアル） */
+        .city-view { background: #ffffff; padding: 20px; border-radius: 15px; box-shadow: 0 6px 12px rgba(0,0,0,0.08); margin-bottom: 20px; border: 4px solid #b2ebf2; }
+        .city-level-badge { display: inline-block; background: #00bcd4; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; }
+        .city-name-display { font-size: 1.3rem; font-weight: bold; color: #333; margin: 0 0 15px 0; }
         
-        /* ボタンエリア（画面下部） */
-        .menu { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 400px; margin: 0 auto; }
-        .btn { display: inline-block; padding: 15px 10px; background: #ff9800; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; width: 48%; box-sizing: border-box; }
-        .btn-adventure { background: #4caf50; width: 100%; font-size: 1.2rem; padding: 20px; border-bottom: 4px solid #388e3c; }
+        /* 街の画像プレースホルダー（将来画像に置き換える部分） */
+        .city-image-box { font-size: 4rem; margin: 15px 0; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+        
+        /* 建設メニュー */
+        .build-menu { background: #fffde7; padding: 15px; border-radius: 10px; border: 2px dashed #fbc02d; text-align: left; }
+        .build-menu-title { font-weight: bold; color: #f57f17; margin: 0 0 8px 0; font-size: 0.9rem; }
+        .build-req { font-size: 0.9rem; color: #555; margin: 4px 0; }
+        .btn-build { width: 100%; padding: 14px; margin-top: 10px; background: #ff9800; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 0 #e65100; transition: transform 0.1s, box-shadow 0.1s; }
+        .btn-build:active { transform: translateY(4px); box-shadow: 0 0 0 #e65100; }
+        .btn-build:disabled { background: #ccc; box-shadow: 0 4px 0 #999; cursor: not-allowed; }
+
+        /* ナビゲーションボタン */
+        .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 400px; margin: 0 auto 30px; }
+        .btn { display: flex; align-items: center; justify-content: center; padding: 15px 10px; background: #fff; color: #333; text-decoration: none; border-radius: 10px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 2px solid #eee; }
+        .btn-adventure { grid-column: span 2; background: #4caf50; color: white; font-size: 1.2rem; padding: 18px; border: none; box-shadow: 0 4px 0 #2e7d32; }
+        .btn-adventure:active { transform: translateY(4px); box-shadow: 0 0 0 #2e7d32; }
+
+        /* 開発用テストエリア */
+        .debug-area { max-width: 400px; margin: 0 auto; padding: 15px; border: 2px dashed #ccc; background: #fafafa; border-radius: 8px; text-align: left; }
+        .debug-btn { padding: 8px 12px; margin-right: 5px; margin-bottom: 5px; border: none; border-radius: 4px; cursor: pointer; background: #e0e0e0; }
     </style>
 </head>
 <body>
 
-    <h1>算数ワールド</h1>
+    <h1>✨ 算数ワールド ✨</h1>
 
     <div class="status-bar">
-        <div>⭐ Lv: <span id="player-level">1</span></div>
-        <div>✨ 経験値: <span id="player-exp">0</span></div>
-        <div>⚡ エネルギー: <span id="player-energy">0</span></div>
+        <div class="status-header">
+            <span>⭐ レベル <span id="ui-level">1</span></span>
+            <span>探検家</span>
+        </div>
+        <div class="exp-bar-bg">
+            <div class="exp-bar-fill" id="ui-exp-bar"></div>
+        </div>
+        <div class="exp-text">次のレベルまで: あと <span id="ui-exp-remain">100</span> EXP</div>
+        
+        <div class="energy-box">⚡ エネルギー: <span id="ui-energy">0</span></div>
     </div>
 
-    <div class="city-view" id="city-image">
-        <div>現在の街の様子</div>
-        <h2 id="city-level">レベル0：荒地</h2>
-        <p>（ここに街の画像が入ります）</p>
+    <div class="city-view">
+        <div class="city-level-badge">街レベル <span id="ui-city-level">0</span></div>
+        <h2 class="city-name-display" id="ui-city-name">荒地</h2>
+        
+        <div class="city-image-box" id="ui-city-emoji">🏕️</div>
+        
+        <div class="build-menu">
+            <p class="build-menu-title">🚧 次の目標：<span id="ui-next-name">---</span></p>
+            <p class="build-req">⭐ 必要レベル: <span id="ui-next-lv">0</span></p>
+            <p class="build-req">⚡ 必要エネルギー: <span id="ui-next-cost">0</span></p>
+            <button class="btn-build" id="ui-btn-build" onclick="handleBuild()">🔨 建設する！</button>
+        </div>
     </div>
 
     <div class="menu">
-        <a href="html/map.html" class="btn btn-adventure">🗺️ 冒険へ（マップ）</a>
-        <a href="html/gacha.html" class="btn">👥 仲間</a>
-        <a href="html/book.html" class="btn">📖 図鑑</a>
+        <a href="html/unit2.html" class="btn btn-adventure">⚔️ 冒険へ（10の神殿）</a>
+        <a href="html/gacha.html" class="btn">👥 仲間ガチャ</a>
+        <a href="html/book.html" class="btn">📖 ずかん</a>
     </div>
 
-    <script>
-        // ブラウザの保存領域（LocalStorage）からデータを読み込む仕組みです。
-        // まだデータがない（初めて遊ぶ）時は、右側の「1」や「0」が入ります。
-        let level = localStorage.getItem('player_level') || 1;
-        let exp = localStorage.getItem('total_exp') || 0;
-        let energy = localStorage.getItem('energy') || 0;
+    <div class="debug-area">
+        <p style="margin-top:0; font-size:0.8rem; color:#666; font-weight:bold;">🔧 開発者用ツール</p>
+        <button class="debug-btn" onclick="addRewards(20, 15); updateUI();">+20 EXP / +15 ⚡</button>
+        <button class="debug-btn" onclick="addRewards(100, 50); updateUI();">一気にレベルUP</button>
+        <button class="debug-btn" onclick="resetData()" style="background:#ffcdd2; color:#c62828;">データリセット</button>
+    </div>
 
-        // 上で書いたHTMLの「id」を見つけて、読み込んだ数字をスポンとはめ込みます。
-        document.getElementById('player-level').textContent = level;
-        document.getElementById('player-exp').textContent = exp;
-        document.getElementById('player-energy').textContent = energy;
+    <script src="js/system.js"></script>
+
+    <script>
+        // 街のレベルに応じた絵文字の配列（画像を入れるまでの代わり）
+        const CITY_EMOJIS = ["🏕️", "🗿", "⛺", "⛲", "🛖", "🌱", "🛠️", "🧱", "🎪", "🕰️", "🍞", "📚", "⛲✨", "🔭", "🗽", "🏰"];
+
+        function updateUI() {
+            let data = loadData();
+            
+            // ① ステータスの更新
+            document.getElementById('ui-level').textContent = data.level;
+            document.getElementById('ui-energy').textContent = data.energy;
+
+            // ② 経験値ゲージの計算
+            let nextLevelExp = data.level * 100;
+            let currentLevelBaseExp = (data.level - 1) * 100;
+            let expInCurrentLevel = data.exp - currentLevelBaseExp;
+            
+            // ゲージのパーセント計算
+            let progressPercent = (expInCurrentLevel / 100) * 100;
+            if (progressPercent > 100) progressPercent = 100;
+            document.getElementById('ui-exp-bar').style.width = progressPercent + "%";
+            document.getElementById('ui-exp-remain').textContent = nextLevelExp - data.exp;
+
+            // ③ 街の表示更新
+            document.getElementById('ui-city-level').textContent = data.cityLevel;
+            
+            // 街の名前（直前に建てた建物の名前）
+            if (data.cityLevel === 0) {
+                document.getElementById('ui-city-name').textContent = "何もない荒地";
+            } else {
+                document.getElementById('ui-city-name').textContent = CITY_BUILDINGS[data.cityLevel - 1].name;
+            }
+
+            // 絵文字の更新
+            let emojiIndex = Math.min(data.cityLevel, CITY_EMOJIS.length - 1);
+            document.getElementById('ui-city-emoji').textContent = CITY_EMOJIS[emojiIndex];
+
+            // ④ 建設メニューの更新
+            let nextBuilding = CITY_BUILDINGS[data.cityLevel];
+            let buildBtn = document.getElementById('ui-btn-build');
+
+            if (nextBuilding) {
+                document.getElementById('ui-next-name').textContent = nextBuilding.name;
+                document.getElementById('ui-next-lv').textContent = nextBuilding.requiredLevel;
+                document.getElementById('ui-next-cost').textContent = nextBuilding.cost;
+                
+                // 条件を満たしているかチェックしてボタンの色を変える
+                if (data.level >= nextBuilding.requiredLevel && data.energy >= nextBuilding.cost) {
+                    buildBtn.disabled = false;
+                    buildBtn.textContent = "🔨 建設する！";
+                } else {
+                    buildBtn.disabled = true;
+                    buildBtn.textContent = "🔒 条件が足りません";
+                }
+            } else {
+                document.getElementById('ui-next-name').textContent = "すべて完成！";
+                document.getElementById('ui-next-lv').textContent = "-";
+                document.getElementById('ui-next-cost').textContent = "-";
+                buildBtn.disabled = true;
+                buildBtn.textContent = "👑 クリア！";
+            }
+        }
+
+        function handleBuild() {
+            let success = buildCity();
+            if (success) {
+                updateUI();
+            }
+        }
+
+        // ページ読み込み時にUIを初期化
+        window.onload = updateUI;
     </script>
 
 </body>
