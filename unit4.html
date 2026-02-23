@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>たし算火山 - 算数ワールド</title>
+    <style>
+        /* 火山のテーマカラー（赤と黒） */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background-color: #ffebee; margin: 0; padding: 10px; color: #333; }
+        h1 { color: #c62828; font-size: 1.6rem; margin-bottom: 5px; text-shadow: 1px 1px 0px #fff; }
+        .subtitle { color: #e53935; font-size: 1rem; font-weight: bold; margin-bottom: 20px; }
+
+        /* バトルシーン（キャラクター表示エリア） */
+        .battle-scene { display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 3.5rem; height: 80px; margin-bottom: 10px; }
+        #fireball { font-size: 2.5rem; display: inline-block; width: 40px; }
+        
+        /* 攻撃とダメージのアニメーション */
+        @keyframes shoot {
+            0% { transform: translateX(0) scale(1); opacity: 1; }
+            100% { transform: translateX(80px) scale(2); opacity: 0; }
+        }
+        .fire-anim { animation: shoot 0.4s ease-out; }
+        
+        @keyframes damage {
+            0%, 100% { transform: translateX(0); filter: brightness(1); }
+            25% { transform: translateX(-10px); filter: brightness(2) drop-shadow(0 0 10px red); }
+            75% { transform: translateX(10px); filter: brightness(2) drop-shadow(0 0 10px red); }
+        }
+        .monster-damage { animation: damage 0.4s ease-out; }
+
+        /* 問題表示エリア */
+        .question-box { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 6px 0 #ef9a9a; margin-bottom: 25px; border: 4px solid #ef5350; }
+        .question-text { font-size: 2.5rem; font-weight: bold; color: #b71c1c; margin-bottom: 10px; letter-spacing: 3px; }
+
+        /* 選択肢ボタン（4択） */
+        .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 400px; margin: 0 auto 30px; }
+        .btn-choice { font-size: 1.8rem; font-weight: bold; padding: 15px; border: none; border-radius: 12px; cursor: pointer; background: #fff; color: #333; box-shadow: 0 5px 0 #ffcdd2; border: 2px solid #ffebee; transition: transform 0.1s, box-shadow 0.1s; }
+        .btn-choice:active { transform: translateY(5px); box-shadow: 0 0 0 #ffcdd2; }
+        
+        /* 戻るボタン */
+        .btn-back { display: inline-block; padding: 12px 20px; background: #424242; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 0 #212121; margin-top: 10px; }
+        .btn-back:active { transform: translateY(4px); box-shadow: 0 0 0 #212121; }
+
+        /* フィードバック */
+        #feedback { font-size: 1.5rem; font-weight: bold; height: 30px; margin-bottom: 10px; }
+        .correct { color: #d32f2f; animation: pop 0.3s ease-out; }
+        .wrong { color: #757575; animation: shake 0.3s ease-in-out; }
+
+        @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    </style>
+</head>
+<body>
+
+    <h1>🌋 たし算火山</h1>
+    <div class="subtitle">モンスターを たおせ！</div>
+
+    <div class="battle-scene">
+        <div id="player">🧙‍♂️</div>
+        <div id="fireball"></div>
+        <div id="monster">🦖</div>
+    </div>
+
+    <div id="feedback"></div>
+
+    <div class="question-box">
+        <div class="question-text" id="q-text">もんだい...</div>
+    </div>
+
+    <div class="choices-grid" id="choices-area"></div>
+
+    <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
+
+    <script src="system.js"></script>
+
+    <script>
+        let currentAnswer = 0;
+        let isAnswering = false; // 連打防止
+
+        // いろんなモンスターを用意
+        const monsters = ["🦖", "🐉", "🕷️", "🦂", "🦇", "🐺", "👺"];
+
+        function generateQuestion() {
+            isAnswering = false;
+            
+            // 画面のリセット
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('feedback').className = "";
+            document.getElementById('fireball').textContent = "";
+            document.getElementById('fireball').className = "";
+            document.getElementById('monster').className = ""; 
+            
+            // モンスターをランダムに表示
+            document.getElementById('monster').textContent = monsters[Math.floor(Math.random() * monsters.length)];
+
+            // たし算の作成 (1〜9同士のたし算)
+            let a = Math.floor(Math.random() * 9) + 1;
+            let b = Math.floor(Math.random() * 9) + 1;
+            currentAnswer = a + b;
+
+            document.getElementById('q-text').textContent = `${a} ＋ ${b} ＝ ❓`;
+
+            generateChoices(currentAnswer);
+        }
+
+        function generateChoices(correct) {
+            let choices = new Set([correct]);
+
+            // 正解に近い数字をダミーにする（ひっかけ）
+            while (choices.size < 4) {
+                let offset = Math.floor(Math.random() * 5) - 2; // -2 から +2 のズレ
+                let wrongAnswer = correct + offset;
+                
+                // 答えが0以下にならないように、また正解と同じにならないようにする
+                if (wrongAnswer > 0 && wrongAnswer !== correct) {
+                    choices.add(wrongAnswer);
+                } else {
+                    // うまくいかなかったらランダムな数字
+                    choices.add(Math.floor(Math.random() * 18) + 1);
+                }
+            }
+
+            let choiceArray = Array.from(choices).sort(() => Math.random() - 0.5);
+
+            const choicesArea = document.getElementById('choices-area');
+            choicesArea.innerHTML = ""; 
+            choiceArray.forEach(num => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-choice';
+                btn.textContent = num;
+                btn.onclick = () => checkAnswer(num);
+                choicesArea.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            if (isAnswering) return;
+            const feedback = document.getElementById('feedback');
+
+            if (selected === currentAnswer) {
+                isAnswering = true;
+                
+                // 炎の攻撃アニメーション！
+                document.getElementById('fireball').textContent = "🔥";
+                document.getElementById('fireball').className = "fire-anim";
+                
+                // 炎が当たるタイミング（0.2秒後）でモンスターがダメージを受ける
+                setTimeout(() => {
+                    document.getElementById('monster').className = "monster-damage";
+                }, 200);
+
+                feedback.textContent = "⭕ ドカン！ (+10 EXP)";
+                feedback.className = "correct";
+                
+                let result = addRewards(10, 5); 
+                
+                if (result.leveledUp) {
+                    setTimeout(() => alert(`🎉 レベルアップ！ Lv.${result.newLevel}になったよ！`), 100);
+                }
+
+                // サクサク進むように0.8秒で次の問題へ
+                setTimeout(generateQuestion, 800);
+            } else {
+                feedback.textContent = "❌ がんばれ！ もういちど！";
+                feedback.className = "wrong";
+            }
+        }
+
+        window.onload = generateQuestion;
+    </script>
+</body>
+</html>
