@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>なかま図鑑 - 算数ワールド</title>
+    <style>
+        /* 図鑑のテーマカラー（本のような茶色と落ち着いた色） */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background-color: #efebe9; margin: 0; padding: 10px; color: #4e342e; }
+        h1 { color: #5d4037; font-size: 1.8rem; margin-bottom: 5px; text-shadow: 1px 1px 0px #fff; }
+        .subtitle { color: #795548; font-size: 1rem; font-weight: bold; margin-bottom: 20px; }
+
+        /* 集めた数の表示 */
+        .progress-box { background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 0 #d7ccc8; margin-bottom: 20px; border: 3px solid #bcaaa4; display: inline-block; font-size: 1.2rem; font-weight: bold; }
+        .progress-highlight { color: #e65100; font-size: 1.5rem; }
+
+        /* 図鑑のグリッド（3列で並べる） */
+        .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 500px; margin: 0 auto 30px; }
+
+        /* キャラクターのカード */
+        .card { background: #fff; border-radius: 12px; padding: 10px 5px; box-shadow: 0 4px 0 #ccc; border: 2px solid #eee; display: flex; flex-direction: column; align-items: center; position: relative; transition: transform 0.1s; }
+        .card:active { transform: translateY(2px); box-shadow: 0 2px 0 #ccc; }
+        
+        .card-emoji { font-size: 2.5rem; margin-bottom: 5px; }
+        .card-name { font-size: 0.7rem; font-weight: bold; color: #333; }
+        
+        /* 持っている数のバッジ */
+        .count-badge { position: absolute; top: -5px; right: -5px; background: #ff9800; color: white; font-size: 0.8rem; font-weight: bold; padding: 3px 6px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        /* まだ持っていない（未開放）のカード */
+        .card.locked { background: #e0e0e0; border-color: #bdbdbd; box-shadow: 0 4px 0 #9e9e9e; }
+        .card.locked .card-emoji { color: transparent; text-shadow: 0 0 0 #9e9e9e; /* シルエット風にする魔法のCSS */ }
+        .card.locked .card-name { color: #757575; }
+
+        /* 戻るボタン */
+        .btn-back { display: inline-block; padding: 12px 20px; background: #8d6e63; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 0 #5d4037; margin-top: 10px; margin-bottom: 30px; }
+        .btn-back:active { transform: translateY(4px); box-shadow: 0 0 0 #5d4037; }
+    </style>
+</head>
+<body>
+
+    <h1>📖 なかま図鑑</h1>
+    <div class="subtitle">あつめた なかまを かくにんしよう！</div>
+
+    <div class="progress-box">
+        あつめたしゅるい： <span class="progress-highlight" id="collection-count">0</span> / <span id="total-count">14</span>
+    </div>
+
+    <div class="book-grid" id="book-area">
+        </div>
+
+    <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
+
+    <script src="system.js"></script>
+
+    <script>
+        // ガチャと同じキャラクターのリスト（全種類）
+        const ALL_CHARACTERS = [
+            { emoji: "🐶", name: "こいぬ" },
+            { emoji: "🐱", name: "こねこ" },
+            { emoji: "🐭", name: "ねずみ" },
+            { emoji: "🐹", name: "ハムスター" },
+            { emoji: "🐰", name: "うさぎ" },
+            { emoji: "🦊", name: "キツネ" },
+            { emoji: "🐻", name: "クマ" },
+            { emoji: "🐼", name: "パンダ" },
+            { emoji: "🐨", name: "コアラ" },
+            { emoji: "🦁", name: "ライオン" },
+            { emoji: "🐯", name: "トラ" },
+            { emoji: "🦄", name: "ユニコーン" },
+            { emoji: "🐉", name: "ドラゴン" },
+            { emoji: "👽", name: "うちゅうじん" }
+        ];
+
+        function renderBook() {
+            let data = loadData();
+            let companions = data.companions || []; // ガチャで引いた仲間のリスト
+            
+            // 何種類集めたか、それぞれ何匹いるかを数える
+            let counts = {};
+            let uniqueCount = 0;
+
+            companions.forEach(emoji => {
+                if (!counts[emoji]) {
+                    counts[emoji] = 0;
+                    uniqueCount++; // 新しい種類を見つけたらカウントアップ
+                }
+                counts[emoji]++;
+            });
+
+            // 進捗の表示を更新
+            document.getElementById('collection-count').textContent = uniqueCount;
+            document.getElementById('total-count').textContent = ALL_CHARACTERS.length;
+
+            const bookArea = document.getElementById('book-area');
+            bookArea.innerHTML = ""; // 一度リセット
+
+            // 全キャラクターを図鑑に並べる
+            ALL_CHARACTERS.forEach(char => {
+                let card = document.createElement('div');
+                let myCount = counts[char.emoji] || 0; // 持っている数（持っていなければ0）
+
+                if (myCount > 0) {
+                    // 持っている場合（カラー表示＋持っている数を表示）
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="count-badge">${myCount}</div>
+                        <div class="card-emoji">${char.emoji}</div>
+                        <div class="card-name">${char.name}</div>
+                    `;
+                } else {
+                    // 持っていない場合（シルエット表示＋名前は？？？）
+                    card.className = 'card locked';
+                    card.innerHTML = `
+                        <div class="card-emoji">${char.emoji}</div>
+                        <div class="card-name">？？？</div>
+                    `;
+                }
+
+                bookArea.appendChild(card);
+            });
+        }
+
+        // ページを開いたときに図鑑を作る
+        window.onload = renderBook;
+    </script>
+</body>
+</html>
