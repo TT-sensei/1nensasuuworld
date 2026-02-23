@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ことばの町 - 算数ワールド</title>
+    <style>
+        /* 町のテーマカラー（青と水色） */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background-color: #e1f5fe; margin: 0; padding: 10px; color: #333; }
+        h1 { color: #0277bd; font-size: 1.6rem; margin-bottom: 5px; text-shadow: 1px 1px 0px #fff; }
+        .subtitle { color: #0288d1; font-size: 1rem; font-weight: bold; margin-bottom: 20px; }
+
+        /* 町の人の表示エリア */
+        .town-scene { font-size: 4rem; margin-bottom: 5px; }
+        
+        /* 吹き出し風の問題表示エリア */
+        .question-box { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 6px 0 #81d4fa; margin-bottom: 25px; border: 4px solid #29b6f6; position: relative; max-width: 90%; margin-left: auto; margin-right: auto; }
+        
+        /* 吹き出しのしっぽ */
+        .question-box::before { content: ""; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); border-width: 10px; border-style: solid; border-color: transparent transparent #29b6f6 transparent; }
+        
+        .question-text { font-size: 1.3rem; font-weight: bold; color: #01579b; line-height: 1.6; text-align: left; }
+
+        /* 選択肢ボタン */
+        .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 400px; margin: 0 auto 30px; }
+        .btn-choice { font-size: 1.8rem; font-weight: bold; padding: 15px; border: none; border-radius: 12px; cursor: pointer; background: #fff; color: #333; box-shadow: 0 5px 0 #b3e5fc; border: 2px solid #e1f5fe; transition: transform 0.1s, box-shadow 0.1s; }
+        .btn-choice:active { transform: translateY(5px); box-shadow: 0 0 0 #b3e5fc; }
+        
+        /* 戻るボタン */
+        .btn-back { display: inline-block; padding: 12px 20px; background: #607d8b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 0 #455a64; margin-top: 10px; }
+        .btn-back:active { transform: translateY(4px); box-shadow: 0 0 0 #455a64; }
+
+        /* フィードバック */
+        #feedback { font-size: 1.5rem; font-weight: bold; height: 30px; margin-bottom: 10px; }
+        .correct { color: #0288d1; animation: pop 0.3s ease-out; }
+        .wrong { color: #f44336; animation: shake 0.3s ease-in-out; }
+
+        @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        
+        /* 正解時のキャラアニメーション */
+        .happy-anim { animation: jump 0.4s ease-out; }
+        @keyframes jump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    </style>
+</head>
+<body>
+
+    <h1>💬 ことばの町</h1>
+    <div class="subtitle">まちのひとの なやみを かいけつ！</div>
+
+    <div class="town-scene" id="town-person">👨‍🌾</div>
+
+    <div id="feedback"></div>
+
+    <div class="question-box">
+        <div class="question-text" id="q-text">もんだい...</div>
+    </div>
+
+    <div class="choices-grid" id="choices-area"></div>
+
+    <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
+
+    <script src="system.js"></script>
+
+    <script>
+        let currentAnswer = 0;
+        let isAnswering = false;
+
+        const people = ["👨‍🌾", "👩‍🍳", "👮‍♂️", "👷‍♀️", "👨‍🏫", "👩‍⚕️"];
+        const items = ["りんご🍎", "みかん🍊", "あめ🍬", "クッキー🍪", "おはな🌸"];
+
+        function generateQuestion() {
+            isAnswering = false;
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('feedback').className = "";
+            document.getElementById('town-person').className = "town-scene";
+            
+            // ランダムにキャラクターとアイテムを選ぶ
+            document.getElementById('town-person').textContent = people[Math.floor(Math.random() * people.length)];
+            let item = items[Math.floor(Math.random() * items.length)];
+
+            // 0:たし算, 1:ひき算 をランダムで決定
+            let type = Math.floor(Math.random() * 2);
+            let qText = "";
+
+            if (type === 0) {
+                // たし算の文章題
+                let a = Math.floor(Math.random() * 9) + 1;
+                let b = Math.floor(Math.random() * 9) + 1;
+                currentAnswer = a + b;
+                qText = `${item}が ${a}こ、もうひとつのおさらに ${b}こ あります。<br>あわせて いくつ ですか？`;
+            } else {
+                // ひき算の文章題
+                let a = Math.floor(Math.random() * 10) + 5; // 5〜14個
+                let b = Math.floor(Math.random() * 5) + 1;  // 1〜5個
+                
+                // 食べた数より持っている数の方が多くなるように
+                if (a <= b) a = b + 3;
+                
+                currentAnswer = a - b;
+                qText = `${item}が ${a}こ ありました。<br>${b}こ たべました。<br>のこりは いくつ ですか？`;
+            }
+
+            document.getElementById('q-text').innerHTML = qText;
+            generateChoices(currentAnswer);
+        }
+
+        function generateChoices(correct) {
+            let choices = new Set([correct]);
+            while (choices.size < 4) {
+                let offset = Math.floor(Math.random() * 5) - 2;
+                let wrongAnswer = correct + offset;
+                if (wrongAnswer > 0 && wrongAnswer !== correct) {
+                    choices.add(wrongAnswer);
+                } else {
+                    choices.add(Math.floor(Math.random() * 18) + 1);
+                }
+            }
+            let choiceArray = Array.from(choices).sort(() => Math.random() - 0.5);
+
+            const choicesArea = document.getElementById('choices-area');
+            choicesArea.innerHTML = ""; 
+            choiceArray.forEach(num => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-choice';
+                btn.textContent = num;
+                btn.onclick = () => checkAnswer(num);
+                choicesArea.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            if (isAnswering) return;
+            const feedback = document.getElementById('feedback');
+
+            if (selected === currentAnswer) {
+                isAnswering = true;
+                
+                // 正解すると町の人が喜んでジャンプ！
+                document.getElementById('town-person').className = "town-scene happy-anim";
+                document.getElementById('town-person').textContent = "🤩"; // 顔も喜ぶ
+
+                // 総仕上げステージなので、EXPが少し高めでも良いかもしれません
+                feedback.textContent = "⭕ ありがとう！ (+15 EXP)";
+                feedback.className = "correct";
+                
+                let result = addRewards(15, 5); 
+                if (result.leveledUp) {
+                    setTimeout(() => alert(`🎉 レベルアップ！ Lv.${result.newLevel}になったよ！`), 100);
+                }
+
+                setTimeout(generateQuestion, 800);
+            } else {
+                feedback.textContent = "❌ よくよんで もういちど！";
+                feedback.className = "wrong";
+            }
+        }
+
+        window.onload = generateQuestion;
+    </script>
+</body>
+</html>
