@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>なかまの森 - 算数ワールド</title>
+    <style>
+        /* 森のテーマカラー（深い緑と茶色） */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; background-color: #e8f5e9; margin: 0; padding: 10px; color: #333; }
+        h1 { color: #2e7d32; font-size: 1.6rem; margin-bottom: 5px; text-shadow: 1px 1px 0px #fff; }
+        .subtitle { color: #43a047; font-size: 1rem; font-weight: bold; margin-bottom: 20px; }
+
+        /* 問題表示エリア */
+        .question-box { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 6px 0 #a5d6a7; margin-bottom: 25px; border: 4px solid #81c784; }
+        .question-text { font-size: 1.4rem; font-weight: bold; color: #5d4037; margin-bottom: 15px; }
+        
+        /* リンゴの表示エリア */
+        .apple-container { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px; font-size: 2rem; background: #fff3e0; padding: 15px; border-radius: 10px; border: 2px dashed #ffb74d; }
+        .apple-group { display: flex; flex-wrap: wrap; justify-content: center; width: 45%; }
+        .plus-sign { font-size: 1.5rem; font-weight: bold; color: #795548; }
+
+        /* 選択肢ボタン（4択） */
+        .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 400px; margin: 0 auto 30px; }
+        .btn-choice { font-size: 1.8rem; font-weight: bold; padding: 15px; border: none; border-radius: 12px; cursor: pointer; background: #fff; color: #333; box-shadow: 0 5px 0 #c8e6c9; border: 2px solid #e8f5e9; transition: transform 0.1s, box-shadow 0.1s; }
+        .btn-choice:active { transform: translateY(5px); box-shadow: 0 0 0 #c8e6c9; }
+        
+        /* 戻るボタン */
+        .btn-back { display: inline-block; padding: 12px 20px; background: #8d6e63; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 0 #5d4037; margin-top: 10px; }
+        .btn-back:active { transform: translateY(4px); box-shadow: 0 0 0 #5d4037; }
+
+        /* フィードバック */
+        #feedback { font-size: 1.5rem; font-weight: bold; height: 30px; margin-bottom: 10px; }
+        .correct { color: #4caf50; animation: pop 0.3s ease-out; }
+        .wrong { color: #f44336; animation: shake 0.3s ease-in-out; }
+
+        @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+    </style>
+</head>
+<body>
+
+    <h1>🌳 なかまの森</h1>
+    <div class="subtitle">かずを ふたつに わけよう！</div>
+
+    <div id="feedback"></div>
+
+    <div class="question-box">
+        <div class="question-text" id="q-text">もんだい を つくっています...</div>
+        <div class="apple-container">
+            <div class="apple-group" id="apples-left">🍎🍎🍎</div>
+            <div class="plus-sign">と</div>
+            <div class="apple-group" id="apples-right">❓</div>
+        </div>
+    </div>
+
+    <div class="choices-grid" id="choices-area"></div>
+
+    <a href="../index.html" class="btn-back">⬅️ マップにもどる</a>
+
+    <script src="../js/system.js"></script>
+
+    <script>
+        let currentAnswer = 0;
+
+        function generateQuestion() {
+            document.getElementById('feedback').textContent = "";
+            document.getElementById('feedback').className = "";
+
+            // 全体の数を 5〜9 の間でランダムに決める
+            let total = Math.floor(Math.random() * 5) + 5; 
+            
+            // 分ける数の一つを 1〜(total-1) の間で決める
+            let part1 = Math.floor(Math.random() * (total - 1)) + 1;
+            
+            // 答え（もう一つの数）
+            currentAnswer = total - part1;
+
+            // 問題文の作成
+            document.getElementById('q-text').textContent = `「 ${total} 」は 「 ${part1} 」と あといくつ？`;
+
+            // ビジュアル表示（左側にpart1個のリンゴ、右側はハテナ）
+            document.getElementById('apples-left').textContent = "🍎".repeat(part1);
+            document.getElementById('apples-right').textContent = "❓";
+
+            generateChoices(currentAnswer, total);
+        }
+
+        function generateChoices(correct, total) {
+            let choices = new Set([correct]);
+
+            // 不正解の選択肢を追加する（1〜totalの範囲で）
+            while (choices.size < 4) {
+                let randomWrong = Math.floor(Math.random() * total) + 1;
+                choices.add(randomWrong);
+            }
+
+            let choiceArray = Array.from(choices);
+            choiceArray.sort(() => Math.random() - 0.5); // シャッフル
+
+            const choicesArea = document.getElementById('choices-area');
+            choicesArea.innerHTML = ""; 
+
+            choiceArray.forEach(num => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-choice';
+                btn.textContent = num;
+                btn.onclick = () => checkAnswer(num);
+                choicesArea.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const feedback = document.getElementById('feedback');
+
+            if (selected === currentAnswer) {
+                // 正解時に右側のハテナを正解の数のリンゴに変える演出
+                document.getElementById('apples-right').textContent = "🍎".repeat(currentAnswer);
+
+                feedback.textContent = "⭕ だいせいかい！ (+10 EXP, +5 ⚡)";
+                feedback.className = "correct";
+                
+                let result = addRewards(10, 5); 
+                
+                if (result.leveledUp) {
+                    setTimeout(() => alert(`🎉 レベルアップ！ Lv.${result.newLevel}になったよ！`), 100);
+                }
+
+                setTimeout(generateQuestion, 1500);
+            } else {
+                feedback.textContent = "❌ おしい！りんごを かぞえてみて！";
+                feedback.className = "wrong";
+            }
+        }
+
+        window.onload = generateQuestion;
+    </script>
+</body>
+</html>
