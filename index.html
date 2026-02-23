@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算数ワールド 〜すうじの力で世界を再生しよう〜</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background-color: #f0f8ff; margin: 0; padding: 10px; }
+        h1 { font-size: 1.5rem; color: #333; }
+        
+        /* ステータスバー（画面上部） */
+        .status-bar { display: flex; justify-content: space-around; background: #fff; padding: 15px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; font-weight: bold; }
+        
+        /* 街の表示エリア（画面中央） */
+        .city-view { width: 100%; max-width: 400px; height: 250px; background: #e0e0e0; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; border: 3px solid #ccc; }
+        
+        /* ボタンエリア（画面下部） */
+        .menu { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 400px; margin: 0 auto; }
+        .btn { display: inline-block; padding: 15px 10px; background: #ff9800; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; width: 48%; box-sizing: border-box; }
+        .btn-adventure { background: #4caf50; width: 100%; font-size: 1.2rem; padding: 20px; border-bottom: 4px solid #388e3c; }
+    </style>
+</head>
+<body>
+
+    <h1>算数ワールド</h1>
+
+    <div class="status-bar">
+        <div>⭐ Lv: <span id="player-level">1</span></div>
+        <div>✨ 経験値: <span id="player-exp">0</span></div>
+        <div>⚡ エネルギー: <span id="player-energy">0</span></div>
+    </div>
+
+    <div class="city-view" id="city-image">
+        <div>現在の街の様子</div>
+        <h2 id="city-level">レベル0：荒地</h2>
+        <p>（ここに街の画像が入ります）</p>
+    </div>
+
+    <div class="menu">
+        <a href="html/map.html" class="btn btn-adventure">🗺️ 冒険へ（マップ）</a>
+        <a href="html/gacha.html" class="btn">👥 仲間</a>
+        <a href="html/book.html" class="btn">📖 図鑑</a>
+    </div>
+
+    <script>
+        // ブラウザの保存領域（LocalStorage）からデータを読み込む仕組みです。
+        // まだデータがない（初めて遊ぶ）時は、右側の「1」や「0」が入ります。
+        let level = localStorage.getItem('player_level') || 1;
+        let exp = localStorage.getItem('total_exp') || 0;
+        let energy = localStorage.getItem('energy') || 0;
+
+        // 上で書いたHTMLの「id」を見つけて、読み込んだ数字をスポンとはめ込みます。
+        document.getElementById('player-level').textContent = level;
+        document.getElementById('player-exp').textContent = exp;
+        document.getElementById('player-energy').textContent = energy;
+    </script>
+
+</body>
+</html>
