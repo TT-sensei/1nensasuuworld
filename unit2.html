@@ -95,7 +95,7 @@
                 // サクサク進むように0.8秒で次の問題へ
                 setTimeout(generateQuestion, 800);
             } else {
-                feedback.textContent = "❌ おしい！たまの かずを かぞえてみて！";
+                recordMistake();\n                feedback.textContent = "❌ おしい！たまの かずを かぞえてみて！";
                 feedback.className = "wrong";
             }
         }
