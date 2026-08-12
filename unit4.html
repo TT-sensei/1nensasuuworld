@@ -161,7 +161,8 @@
                 // サクサク進むように0.8秒で次の問題へ
                 setTimeout(generateQuestion, 800);
             } else {
-                recordMistake();\n                feedback.textContent = "❌ がんばれ！ もういちど！";
+                recordMistake();
+                feedback.textContent = "❌ がんばれ！ もういちど！";
                 feedback.className = "wrong";
             }
         }
