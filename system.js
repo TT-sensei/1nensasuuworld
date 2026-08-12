@@ -88,7 +88,7 @@ function addRewards(expAmount, energyAmount) {
   data.attempts += 1;
   data.streak += 1;
   data.bestStreak = Math.max(data.bestStreak, data.streak);
-  data.lastPlayed = new Date().toISOString().slice(0, 10);
+  data.lastPlayed = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
 
   let leveledUp = false;
   // 大きな報酬でもレベルを取りこぼさない。
@@ -105,7 +105,7 @@ function recordMistake() {
   const data = loadData();
   data.attempts += 1;
   data.streak = 0;
-  data.lastPlayed = new Date().toISOString().slice(0, 10);
+  data.lastPlayed = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
   saveData(data);
 }
 
