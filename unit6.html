@@ -151,7 +151,8 @@
 
                 setTimeout(generateQuestion, 800);
             } else {
-                recordMistake();\n                feedback.textContent = "❌ よくよんで もういちど！";
+                recordMistake();
+                feedback.textContent = "❌ よくよんで もういちど！";
                 feedback.className = "wrong";
             }
         }
