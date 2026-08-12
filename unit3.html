@@ -56,7 +56,7 @@
             document.getElementById('feedback').textContent = "";
             document.getElementById('feedback').className = "";
 
-            let total = Math.floor(Math.random() * 5) + 5; 
+            let total = Math.floor(Math.random() * 9) + 2; 
             let part1 = Math.floor(Math.random() * (total - 1)) + 1;
             currentAnswer = total - part1;
 
@@ -105,7 +105,8 @@
                 // サクサク進むように0.8秒で次の問題へ
                 setTimeout(generateQuestion, 800);
             } else {
-                recordMistake();\n                feedback.textContent = "❌ おしい！りんごを かぞえてみて！";
+                recordMistake();
+                feedback.textContent = "❌ おしい！りんごを かぞえてみて！";
                 feedback.className = "wrong";
             }
         }
