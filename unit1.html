@@ -115,7 +115,7 @@
                 // サクサク進むように0.8秒で次の問題へ
                 setTimeout(generateQuestion, 800);
             } else {
-                feedback.textContent = "❌ おしい！もういちど！";
+                recordMistake();\n                feedback.textContent = "❌ おしい！もういちど！";
                 feedback.className = "wrong";
             }
         }
