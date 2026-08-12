@@ -50,7 +50,7 @@
             document.getElementById('feedback').textContent = "";
             document.getElementById('feedback').className = "";
 
-            const type = Math.floor(Math.random() * 3);
+            const type = Math.floor(Math.random() * 5);
             let qText = "";
             let qContent = "";
 
@@ -65,11 +65,23 @@
                 currentAnswer = start + 2;
                 qText = "「？」に はいる かずは なに？";
                 qContent = `${start} → ${start + 1} → ？ → ${start + 3}`;
-            } else {
+            } else if (type === 2) {
                 const start = Math.floor(Math.random() * 6) + 5;
                 currentAnswer = start - 1;
                 qText = "「？」に はいる かずは なに？";
                 qContent = `${start} → ？ → ${start - 2} → ${start - 3}`;
+            } else if (type === 3) {
+                const a = Math.floor(Math.random() * 10) + 1;
+                let b = Math.floor(Math.random() * 10) + 1;
+                while (b === a) b = Math.floor(Math.random() * 10) + 1;
+                currentAnswer = Math.max(a, b);
+                qText = "おおきい かずは どっちかな？";
+                qContent = `${a} と ${b}`;
+            } else {
+                const n = Math.floor(Math.random() * 8) + 2;
+                currentAnswer = n + 1;
+                qText = "つぎの かずは なにかな？";
+                qContent = `${n} の つぎ → ？`;
             }
 
             document.getElementById('q-text').textContent = qText;
@@ -115,7 +127,8 @@
                 // サクサク進むように0.8秒で次の問題へ
                 setTimeout(generateQuestion, 800);
             } else {
-                recordMistake();\n                feedback.textContent = "❌ おしい！もういちど！";
+                recordMistake();
+                feedback.textContent = "❌ おしい！もういちど！";
                 feedback.className = "wrong";
             }
         }
