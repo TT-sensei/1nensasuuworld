@@ -53,7 +53,7 @@
             let num = Math.floor(Math.random() * 9) + 1; 
             currentAnswer = 10 - num;
 
-            document.getElementById('q-text').textContent = `「 ${num} 」と あといくつで 10 になる？`;
+            document.getElementById('q-text').textContent = Math.random() < 0.5 ? `「 ${num} 」と あといくつで 10 になる？` : `□ ＋ ${num} ＝ 10\n□ に はいる かずは？`;
             document.getElementById('q-content').textContent = "🟡".repeat(num) + "⚪".repeat(currentAnswer);
 
             generateChoices(currentAnswer);
@@ -95,7 +95,8 @@
                 // サクサク進むように0.8秒で次の問題へ
                 setTimeout(generateQuestion, 800);
             } else {
-                recordMistake();\n                feedback.textContent = "❌ おしい！たまの かずを かぞえてみて！";
+                recordMistake();
+                feedback.textContent = "❌ おしい！たまの かずを かぞえてみて！";
                 feedback.className = "wrong";
             }
         }
