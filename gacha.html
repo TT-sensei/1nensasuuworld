@@ -130,7 +130,8 @@
             }
         }
 
-        function playGacha() {\n            playSound('decide');
+        function playGacha() {
+            playSound('decide');
             let data = loadData();
             
             if (data.energy < GACHA_COST) return;
