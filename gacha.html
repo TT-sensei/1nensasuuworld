@@ -82,6 +82,7 @@
     <br>
     <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
 
+    <script src="sound.js"></script>
     <script src="system.js"></script>
 
     <script>
@@ -130,6 +131,7 @@
         }
 
         function playGacha() {
+            playSound('decide');
             let data = loadData();
             
             if (data.energy < GACHA_COST) return;
@@ -154,6 +156,7 @@
             }
             // 当たった仲間を保存データに追加
             data.companions.push(result.emoji);
+            playSound(result.rarity === 'UR' || result.rarity === 'SR' ? 'clear' : 'correct');
             
             // データを保存（system.jsのsaveData関数を使用）
             saveData(data);

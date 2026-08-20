@@ -39,6 +39,7 @@
 
     <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
 
+    <script src="sound.js"></script>
     <script src="system.js"></script>
 
     <script>
@@ -53,7 +54,8 @@
             let num = Math.floor(Math.random() * 9) + 1; 
             currentAnswer = 10 - num;
 
-            document.getElementById('q-text').textContent = Math.random() < 0.5 ? `「 ${num} 」と あといくつで 10 になる？` : `□ ＋ ${num} ＝ 10\n□ に はいる かずは？`;
+            document.getElementById('q-text').textContent = Math.random() < 0.5 ? `「 ${num} 」と あといくつで 10 になる？` : `□ ＋ ${num} ＝ 10
+□ に はいる かずは？`;
             document.getElementById('q-content').textContent = "🟡".repeat(num) + "⚪".repeat(currentAnswer);
 
             generateChoices(currentAnswer);
@@ -82,6 +84,7 @@
             const feedback = document.getElementById('feedback');
 
             if (selected === currentAnswer) {
+                playSound("correct");
                 isAnswering = true;
                 feedback.textContent = "⭕ だいせいかい！ (+10 EXP, +5 ⚡)";
                 feedback.className = "correct";

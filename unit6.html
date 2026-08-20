@@ -60,6 +60,7 @@
 
     <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
 
+    <script src="sound.js"></script>
     <script src="system.js"></script>
 
     <script>
@@ -134,6 +135,7 @@
             const feedback = document.getElementById('feedback');
 
             if (selected === currentAnswer) {
+                playSound("correct");
                 isAnswering = true;
                 
                 // 正解すると町の人が喜んでジャンプ！

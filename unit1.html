@@ -39,6 +39,7 @@
 
     <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
 
+    <script src="sound.js"></script>
     <script src="system.js"></script>
 
     <script>
@@ -114,6 +115,7 @@
             const feedback = document.getElementById('feedback');
 
             if (selected === currentAnswer) {
+                playSound("correct");
                 isAnswering = true; // 次の問題が出るまでボタンを押せなくする
                 feedback.textContent = "⭕ だいせいかい！ (+10 EXP, +5 ⚡)";
                 feedback.className = "correct";
