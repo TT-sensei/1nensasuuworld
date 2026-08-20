@@ -72,7 +72,7 @@
 
     <a href="index.html" class="btn-back">⬅️ マップにもどる</a>
 
-    <script src="system.js"></script>
+    <script src="sound.js"></script>\n    <script src="system.js"></script>
 
     <script>
         let currentAnswer = 0;
@@ -134,7 +134,7 @@
             if (isAnswering) return;
             const feedback = document.getElementById('feedback');
 
-            if (selected === currentAnswer) {
+            if (selected === currentAnswer) {\n                playSound("correct");
                 isAnswering = true;
                 
                 // 光の魔法アニメーション！
