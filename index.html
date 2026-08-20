@@ -18,13 +18,6 @@ main{max-width:760px;margin:auto}.hero{padding:8px 4px 14px;text-align:center}.h
 <body data-home="true">
 <main>
 <header class="hero"><h1>🌈 算数ワールド</h1><p>たのしく学んで、ぼうけんの街を育てよう！</p></header>
-<section class="panel">
-<div class="stats"><div class="stat"><strong id="ui-level">1</strong><small>レベル</small></div><div class="stat"><strong id="ui-energy">0</strong><small>エネルギー</small></div><div class="stat"><strong id="ui-streak">0</strong><small>れんぞく正解</small></div></div>
-<div class="progress"><i id="ui-exp-bar"></i></div><div id="ui-exp-text" style="text-align:right;color:#607d8b;font-size:.8rem"></div>
-</section>
-<section class="panel"><div class="next"><div><h2 id="ui-next-title">きょうのぼうけん</h2><p id="ui-next-text">好きなステージを選んで、問題に挑戦しよう。</p></div><a id="continue-link" class="primary" href="unit1.html">はじめる</a></div></section>
-<section class="panel"><h2 style="margin:0 0 10px;font-size:1.05rem">📚 学びの進みぐあい</h2><div id="mastery-grid" class="mastery-grid"></div></section><section class="panel"><h2 style="margin:0 0 10px;font-size:1.05rem">🏅 学びのバッジ</h2><div class="badge-row"><div class="badge-card"><img src="https://tt-sensei.github.io/edu-assets/assets/badges/common/first-step/badge.png" alt="">はじめの一歩</div><div class="badge-card"><img src="https://tt-sensei.github.io/edu-assets/assets/badges/common/accuracy/badge.png" alt="">せいかく</div><div class="badge-card"><img src="https://tt-sensei.github.io/edu-assets/assets/badges/common/streak/badge.png" alt="">れんぞく</div><div class="badge-card"><img src="https://tt-sensei.github.io/edu-assets/assets/badges/common/level-up/badge.png" alt="">レベルアップ</div></div></section>
-<section class="panel"><div class="next"><div><h2>🏙️ ぼうけんの街</h2><p><span id="ui-city-name">何もない荒地</span>（Lv.<span id="ui-city-level">0</span>）</p></div><div style="font-size:3rem" id="ui-city-emoji">🏕️</div></div><button class="build" id="ui-btn-build">🔨 建設する</button><button class="reset" onclick="resetData()">記録をリセット</button></section>
 <h2 class="map-title">🗺️ ぼうけんマップ</h2>
 <div class="world-grid">
 <a class="world-node" style="--c:#8bc34a;--s:#689f38" href="unit1.html"><div class="world-icon">🔰</div><div class="world-name">はじまりの村</div><div class="world-desc">1〜10の かず</div></a>
@@ -35,6 +28,13 @@ main{max-width:760px;margin:auto}.hero{padding:8px 4px 14px;text-align:center}.h
 <a class="world-node" style="--c:#03a9f4;--s:#0277bd" href="unit6.html"><div class="world-icon">💬</div><div class="world-name">ことばの町</div><div class="world-desc">文章もんだい</div></a>
 </div>
 <div class="sub-menu"><a href="gacha.html">✨ 仲間ガチャ</a><a href="book.html">📖 なかま図鑑</a></div>
+<section class="panel">
+<div class="stats"><div class="stat"><strong id="ui-level">1</strong><small>レベル</small></div><div class="stat"><strong id="ui-energy">0</strong><small>エネルギー</small></div><div class="stat"><strong id="ui-streak">0</strong><small>れんぞく正解</small></div></div>
+<div class="progress"><i id="ui-exp-bar"></i></div><div id="ui-exp-text" style="text-align:right;color:#607d8b;font-size:.8rem"></div>
+</section>
+<section class="panel"><div class="next"><div><h2 id="ui-next-title">きょうのぼうけん</h2><p id="ui-next-text">好きなステージを選んで、問題に挑戦しよう。</p></div><a id="continue-link" class="primary" href="unit1.html">はじめる</a></div></section>
+<section class="panel"><h2 style="margin:0 0 10px;font-size:1.05rem">📚 学びの進みぐあい</h2><div id="mastery-grid" class="mastery-grid"></div></section><section class="panel"><h2 style="margin:0 0 10px;font-size:1.05rem">🏅 学びのバッジ</h2><div class="badge-row"><div class="badge-card"><img src="https://tt-sensei.github.io/edu-assets/assets/badges/common/first-step/badge.png" alt="">はじめの一歩</div><div class="badge-card"><img src="https://tt-sensei.github.io/edu-assets/assets/badges/common/accuracy/badge.png" alt="">せいかく</div><div class="badge-card"><img src="https://tt-sensei.github.io/edu-assets/assets/badges/common/streak/badge.png" alt="">れんぞく</div><div class="badge-card"><img src="https://tt-sensei.github.io/edu-assets/assets/badges/common/level-up/badge.png" alt="">レベルアップ</div></div></section>
+<section class="panel"><div class="next"><div><h2>🏙️ ぼうけんの街</h2><p><span id="ui-city-name">何もない荒地</span>（Lv.<span id="ui-city-level">0</span>）</p></div><div style="font-size:3rem" id="ui-city-emoji">🏕️</div></div><button class="build" id="ui-btn-build">🔨 建設する</button><button class="reset" onclick="resetData()">記録をリセット</button></section>
 </main>
 <script src="sound.js"></script><script src="system.js"></script>
 <script>
