@@ -147,7 +147,7 @@
                     document.getElementById('monster').className = "monster-damage";
                 }, 200);
 
-                feedback.textContent = "⭕ ピカーン！ (+10 EXP)";
+                showNaviFeedback('correct');
                 feedback.className = "correct";
                 
                 let result = addRewards(10, 5); 
@@ -158,7 +158,7 @@
                 setTimeout(generateQuestion, 800);
             } else {
                 recordMistake();
-                feedback.textContent = "❌ がんばれ！ もういちど！";
+                showNaviFeedback('retry');
                 feedback.className = "wrong";
             }
         }
