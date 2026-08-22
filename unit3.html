@@ -96,7 +96,7 @@
                 isAnswering = true;
                 document.getElementById('apples-right').textContent = "🍎".repeat(currentAnswer);
 
-                feedback.textContent = "⭕ だいせいかい！ (+10 EXP, +5 ⚡)";
+                showNaviFeedback('correct');
                 feedback.className = "correct";
                 
                 let result = addRewards(10, 5); 
@@ -109,7 +109,7 @@
                 setTimeout(generateQuestion, 800);
             } else {
                 recordMistake();
-                feedback.textContent = "❌ おしい！りんごを かぞえてみて！";
+                showNaviFeedback('retry');
                 feedback.className = "wrong";
             }
         }
