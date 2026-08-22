@@ -86,7 +86,7 @@
             if (selected === currentAnswer) {
                 playSound("correct");
                 isAnswering = true;
-                feedback.textContent = "⭕ だいせいかい！ (+10 EXP, +5 ⚡)";
+                showNaviFeedback('correct');
                 feedback.className = "correct";
                 
                 let result = addRewards(10, 5); 
@@ -99,7 +99,7 @@
                 setTimeout(generateQuestion, 800);
             } else {
                 recordMistake();
-                feedback.textContent = "❌ おしい！たまの かずを かぞえてみて！";
+                showNaviFeedback('retry');
                 feedback.className = "wrong";
             }
         }
