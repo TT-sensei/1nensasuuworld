@@ -71,7 +71,8 @@
         function generateChoices(correct, total) {
             let choices = new Set([correct]);
             while (choices.size < 4) {
-                choices.add(Math.floor(Math.random() * total) + 1);
+                // 合計が2や3でも、必ず4種類の選択肢を作れるようにする
+                choices.add(Math.floor(Math.random() * 10) + 1);
             }
             let choiceArray = Array.from(choices).sort(() => Math.random() - 0.5);
 
