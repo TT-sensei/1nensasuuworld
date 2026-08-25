@@ -17,6 +17,9 @@ const COLLECTIONS=[['算数バッジ','https://tt-sensei.github.io/edu-assets/as
 const KEY='oneNumberFantasyState';
 function fresh(){return {schemaVersion:2,selectedCharacter:0,trainingPartner:1,playerLevel:1,exp:0,supportMode:false,stageProgress:{},bossProgress:{},learningStats:{},reviewQueue:[],mastery:{},bestTimes:{},maxCombos:{},monsterBook:{},monsterDefeatCounts:{},collections:[],settings:{muted:false},totalCorrect:0,totalWrong:0,totalAttempts:0,clearCount:0,maxCombo:0,lastStage:null,repeatCount:0};}
 let state=(()=>{try{return {...fresh(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return fresh()}})();
+let audioCtx;
+function beep(kind='correct'){if(state.settings?.muted)return;try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();const notes=kind==='wrong'?[220,145]:kind==='special'?[523,784,1047]:[659,880];notes.forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+i*.09;o.type=kind==='wrong'?'triangle':'sine';o.frequency.value=f;g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+.19)})}catch(e){}}
+document.addEventListener('click',e=>{if(e.target.closest('.choice'))beep('correct')});
 function save(){localStorage.setItem(KEY,JSON.stringify(state));updateTop()}
 function updateTop(){el('lv').textContent=state.playerLevel;el('exp').textContent=state.exp;el('masters').textContent=Object.values(state.mastery).filter(Boolean).length;el('levelText').textContent='Lv.'+state.playerLevel;el('expText').textContent=state.exp+' / '+(state.playerLevel*100)+' EXP';el('expBar').style.width=Math.min(100,state.exp/(state.playerLevel*100)*100)+'%'}
 function el(id){return document.getElementById(id)}
