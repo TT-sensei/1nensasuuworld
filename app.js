@@ -83,10 +83,10 @@ function wordParts(q){
 function formatWordInput(value){return value.replace('+',' ＋ ').replace('-',' − ')}
 function renderWordControls(){
  if(!battle||battle.stage.kind!=='word')return;
- let equation=battle.wordPhase==='equation',value=battle.wordInput||'';
+ let equation=battle.wordPhase==='equation',value=battle.wordInput||'',savedEquation=!equation?formatWordInput(battle.wordExpression||''):'';
  let keys=equation?['7','8','9','+','4','5','6','-','1','2','3','back','clear','0']:['1','2','3','4','5','6','7','8','9','clear','0','back'];
  let label=key=>key==='back'?'⌫':key==='clear'?'C':key==='-'?'−':key;
- el('choices').innerHTML=`<div class="word-pad ${equation?'equation-pad':'answer-pad'}"><div class="word-step">${equation?'① 式を つくろう':'② こたえを いれよう'}</div><div class="word-input" aria-live="polite">${formatWordInput(value)||'…'}</div><div class="word-keypad">${keys.map(key=>`<button class="word-key ${key==='+'||key==='-'?'operator':''} ${key==='back'||key==='clear'?'utility':''}" onclick="wordKey('${key}')">${label(key)}</button>`).join('')}</div><button class="word-submit ${equation?'blue':'green'}" onclick="submitWordAttack()">⚔️ ${equation?'式で 攻撃！':'答えで 攻撃！'}</button></div>`;
+ el('choices').innerHTML=`<div class="word-pad ${equation?'equation-pad':'answer-pad'}"><div class="word-step">${equation?'① 式を つくろう':'② こたえを いれよう'}</div>${savedEquation?`<div class="word-saved-equation">式　${savedEquation} ＝</div>`:''}<div class="word-input" aria-live="polite">${formatWordInput(value)||'…'}</div><div class="word-keypad">${keys.map(key=>`<button class="word-key ${key==='+'||key==='-'?'operator':''} ${key==='back'||key==='clear'?'utility':''}" onclick="wordKey('${key}')">${label(key)}</button>`).join('')}</div><button class="word-submit ${equation?'blue':'green'}" onclick="submitWordAttack()">⚔️ ${equation?'式で 攻撃！':'答えで 攻撃！'}</button></div>`;
 }
 function wordKey(key){
  if(!battle||battle.locked||battle.stage.kind!=='word')return;
@@ -141,6 +141,7 @@ function submitWordAttack(){
   beep(special?'special':'correct');
   updateBattleHud();
   el('feedback').textContent=special?'✨ SPECIAL！ 式が できた！ つぎは答えで 攻撃！':'⚔️ 式で ATTACK！ つぎは答えで 攻撃！';
+  battle.wordExpression=value;
   let q=battle.q;
   setTimeout(()=>{
    if(!battle||battle.q!==q||battle.wordPhase!=='equation')return;
@@ -157,7 +158,7 @@ function startBattle(stageId){
  let time=isBoss?(support?160:120):isMid?(support?120:90):(support?90:60);
  let stageIndex=STAGES.findIndex(x=>x.id===stageId),pool=isBoss?BOSS:isMid?MID:(ZAKO_STAGE_POOLS[stageIndex]||ZAKO);
  let monster=pool[Math.floor(Math.random()*pool.length)],monsterCategory=MONSTER_CATEGORY[monster]||'zako',maxEnemyHp=isBoss?16:5;
- battle={stage:s,monster,monsterCategory,isBoss,questionNo:0,total:10,correct:0,wrong:0,combo:0,maxCombo:0,playerHp:support?7:5,maxPlayerHp:support?7:5,enemyHp:maxEnemyHp,maxEnemyHp,started:Date.now(),time,locked:false,seen:[],support,wordPhase:s.kind==='word'?'equation':null,wordInput:''};
+ battle={stage:s,monster,monsterCategory,isBoss,questionNo:0,total:10,correct:0,wrong:0,combo:0,maxCombo:0,playerHp:support?7:5,maxPlayerHp:support?7:5,enemyHp:maxEnemyHp,maxEnemyHp,started:Date.now(),time,locked:false,seen:[],support,wordPhase:s.kind==='word'?'equation':null,wordInput:'',wordExpression:''};
  el('app').style.backgroundImage=`linear-gradient(#ffffff22,#ffffff88),url('${FANTASY}backgrounds/${s.bg}.webp')`;
  el('battleTitle').textContent=s.name+(isBoss?'・大ボス戦':'・バトル');
  el('battleMode').textContent=support?'サポートON':'サポートOFF';
@@ -179,7 +180,7 @@ function nextQuestion(){
  el('question').innerHTML=visualQuestion(q);
  el('progressText').textContent=battle.isBoss?`第 ${battle.questionNo}問`:`${battle.questionNo} / ${battle.total}`;
  el('feedback').textContent='';
- if(battle.stage.kind==='word'){battle.wordPhase='equation';battle.wordInput='';renderWordControls()}
+ if(battle.stage.kind==='word'){battle.wordPhase='equation';battle.wordInput='';battle.wordExpression='';renderWordControls()}
  else el('choices').innerHTML=choices(q).map(n=>`<button class="choice" onclick="answer(${n})">${n}</button>`).join('');
 }
 function answer(n,fromPad=false,wrongMessage=''){
