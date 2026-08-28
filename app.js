@@ -7,7 +7,7 @@ const STAGES=[
  {id:'unit3',name:'なかまの森',desc:'かずの ぶんかい',bg:'forest',color:'green',kind:'split'},
  {id:'unit4',name:'たし算火山',desc:'たし算',bg:'volcano',color:'red',kind:'add'},
  {id:'unit5',name:'ひき算どうくつ',desc:'ひき算',bg:'cave',color:'purple',kind:'sub'},
- {id:'unit6',name:'ことばの町',desc:'文章もんだい',bg:'town',color:'blue',kind:'word'}
+ {id:'unit6',name:'ことばの町',desc:'式を たてる文章もんだい',bg:'town',color:'blue',kind:'word'}
 ];
 const ZAKO_BASE=["happa-squirrel-leafy","komorin-little-night-bat","purun-little-magic-slime","ember-frost-pup","sakura-snow-puff","star-bat","night-snow-puff","sunset-puru","mizutama-kappa","lantern-firefly","cloud-rain-rabbit","pebble-ram","rainbow-shell-snail","bubblefin-frog","ribbon-tailed-mouse","cobalt-blade-mantis","frostfang-weasel","thunderclaw-ram","skyfin-shark","lantern-eye-moth","pond-mirror-spirit","candy-coral-slug","mossy-porcupine","steam-sprocket-mole"];
 const ZAKO_EVOLVED=["happa-squirrel-leafy-evolved","komorin-little-night-bat-evolved","purun-little-magic-slime-evolved","ember-frost-pup-evolved","sakura-snow-puff-evolved","star-bat-evolved","night-snow-puff-evolved","sunset-puru-evolved","mizutama-kappa-evolved","lantern-firefly-evolved","cloud-rain-rabbit-evolved","pebble-ram-evolved","rainbow-shell-snail-evolved","bubblefin-frog-evolved","candy-coral-slug-evolved","cobalt-blade-mantis-evolved","frostfang-weasel-evolved","lantern-eye-moth-evolved","mossy-porcupine-evolved","pond-mirror-spirit-evolved","ribbon-tailed-mouse-evolved","skyfin-shark-evolved","thunderclaw-ram-evolved","steam-sprocket-mole-evolved"];
@@ -35,21 +35,190 @@ function renderNavi(){el('navis').innerHTML=HEROES.map(x=>`<img src="${NAVI}char
 function renderCharacterSelect(){let home=el('home'),hero=el('navis'),old=el('characterSelectPanel');if(old)old.remove();let panel=document.createElement('div');panel.id='characterSelectPanel';panel.className='panel';panel.innerHTML='<div class="heading"><h2>⚔️ たたかう なかまを えらぼう</h2><span id="selectedHeroLabel" class="tag"></span></div><div id="characterSelect" class="character-select"></div>';let style=document.createElement('style');style.textContent='.character-select{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.character-pick{background:#fff;border:3px solid transparent;border-radius:14px;padding:5px 3px;font-weight:900;color:#334b86}.character-pick.selected{border-color:#f3b63f;background:#fff8dc;box-shadow:0 3px #d6a63b}.character-pick img{width:100%;height:78px;object-fit:contain;display:block}.character-pick small{font-size:.72rem}@media(max-width:500px){.character-select{grid-template-columns:repeat(3,1fr)}.character-pick img{height:64px}}';document.head.appendChild(style);hero.parentElement.after(panel);el('characterSelect').innerHTML=HEROES.map((x,i)=>`<button class="character-pick ${i===state.selectedCharacter?'selected':''}" onclick="selectCharacter(${i})"><img src="${FANTASY}${x[2]}.webp"><small>${x[1]}</small></button>`).join('');el('selectedHeroLabel').textContent=HEROES[state.selectedCharacter][1]}
 function selectCharacter(i){state.selectedCharacter=i;save();renderCharacterSelect()}
 function renderStages(){el('stageGrid').innerHTML=STAGES.map((s,i)=>{let p=state.stageProgress[s.id]||{};return `<button class="stage-btn ${s.color} ${i>0&&!state.stageProgress[STAGES[i-1].id]?.cleared?'locked':''}" onclick="startBattle('${s.id}')">${i===5?'🏘️':'🗺️'} <b>${s.name}</b><small>${s.desc}</small><small>${p.cleared?'✅ クリア '+(p.clears||1)+'回':'▶ ちょうせんする'}</small></button>`}).join('')}
-function questionFor(kind){let a,b,item=['🍎','⭐','🍪','🔴'][Math.floor(Math.random()*4)];if(kind==='count'){let mode=Math.random();if(mode<.55){let n=1+Math.floor(Math.random()*10),visual=item.repeat(n);return {id:'count-'+n,text:`${item}が ${n}こ。ぜんぶで いくつ？`,html:`<span class="visual-hint">${visual}</span><span class="question-prompt">なんこ あるかな？</span>`,answer:n,max:10}}if(mode<.75){a=2+Math.floor(Math.random()*8);return {id:`sequence-next-${a}`,text:`${a-1} → ${a} → ❓`,html:`<span class="number-equation">${a-1} → ${a} → ?</span><span class="question-prompt">つぎの かずは？</span>`,answer:a+1,max:10}}if(mode<.88){a=1+Math.floor(Math.random()*8);return {id:`sequence-middle-up-${a}`,text:`${a} → ❓ → ${a+2}`,html:`<span class="number-equation">${a} → ? → ${a+2}</span><span class="question-prompt">まんなかの かずは？</span>`,answer:a+1,max:10}}a=2+Math.floor(Math.random()*8);return {id:`sequence-middle-${a}`,text:`${a+1} → ❓ → ${a-1}`,html:`<span class="number-equation">${a+1} → ? → ${a-1}</span><span class="question-prompt">まんなかの かずは？</span>`,answer:a,max:10}}if(kind==='make10'){a=1+Math.floor(Math.random()*9);return {id:`make10-${a}`,text:`${a}と あわせて 10になる かずは？`,answer:10-a,max:10}}if(kind==='split'){a=2+Math.floor(Math.random()*8);b=Math.floor(Math.random()*(a-1))+1;return {id:`split-${a}-${b}`,text:`${a}は ${b}と いくつ？`,answer:a-b,max:10}}if(kind==='add'){a=Math.floor(Math.random()*9)+1;b=Math.floor(Math.random()*9)+1;return {id:`add-${a}-${b}`,text:`${a} + ${b} = ?`,answer:a+b,max:18}}if(kind==='sub'){a=Math.floor(Math.random()*10)+5;b=Math.floor(Math.random()*5)+1;return {id:`sub-${a}-${b}`,text:`${a} − ${b} = ?`,answer:a-b,max:14}}a=Math.floor(Math.random()*9)+1;b=Math.floor(Math.random()*9)+1;return Math.random()<.5?{id:`word-add-${a}-${b}`,text:`${item}が ${a}こ。${b}こ もらいました。ぜんぶで？`,answer:a+b,max:18}:{id:`word-sub-${a}-${b}`,text:`${item}が ${a+b}こ。${b}こ たべました。のこりは？`,answer:a,max:18}}
 function choices(q){let set=new Set([q.answer]);while(set.size<4){let n=q.answer+Math.floor(Math.random()*7)-3;if(n>=0&&n<=q.max)set.add(n);else set.add(Math.floor(Math.random()*(q.max+1)))}return [...set].sort(()=>Math.random()-.5)}
 function visualItems(emoji,n){return emoji.repeat(Math.max(0,n))}
 function questionLayout(equation,hint,prompt){return `<span class="number-equation">${equation}</span>${hint?`<span class="visual-hint" aria-hidden="true">${hint}</span>`:''}${prompt?`<span class="question-prompt">${prompt}</span>`:''}`}
-function visualQuestion(q){if(q.html)return q.html;let m=q.id.match(/^(make10|split|word-add|word-sub|add|sub)-([0-9]+)(?:-([0-9]+))?/);if(!m)return `<span class="question-prompt">${q.text}</span>`;let type=m[1],a=+m[2],b=+(m[3]||0),e=['🍎','⭐','🍪','🔴'][Math.floor(Math.random()*4)];if(type==='make10')return questionLayout(`${a} ＋ ? ＝ 10`,visualItems(e,a),`${a}こ あるよ。10こに するには あと いくつ？`);if(type==='split')return questionLayout(`${b} ＋ ? ＝ ${a}`,`${visualItems(e,b)}　｜　${visualItems(e,a-b)}`,`${a}を 2つの まとまりに わけよう`);if(type==='add')return questionLayout(`${a} ＋ ${b} ＝ ?`,`${visualItems(e,a)}　＋　${visualItems(e,b)}`,`${a}こ と ${b}こ。あわせて いくつ？`);if(type==='sub')return questionLayout(`${a} − ${b} ＝ ?`,`${visualItems(e,a)}　−　${visualItems(e,b)}`,`${a}こ から ${b}こ へらすと のこりは？`);if(type==='word-add')return questionLayout(`${a} ＋ ${b} ＝ ?`,`${visualItems(e,a)}　＋　${visualItems(e,b)}`,q.text);if(type==='word-sub')return questionLayout(`${a+b} − ${b} ＝ ?`,`${visualItems(e,a+b)}　−　${visualItems(e,b)}`,q.text);return `<span class="question-prompt">${q.text}</span>`}
 let battle=null,battleClock=null;
-function startBattle(stageId){if(battleClock){clearInterval(battleClock);battleClock=null}let s=STAGES.find(x=>x.id===stageId)||STAGES[0];let support=state.supportMode;let isBoss=stageId==='unit6';let isMid=stageId==='unit5';let time=isBoss?(support?160:120):isMid?(support?120:90):(support?90:60);let stageIndex=STAGES.findIndex(x=>x.id===stageId);let pool=isBoss?BOSS:isMid?MID:(ZAKO_STAGE_POOLS[stageIndex]||ZAKO);let monster=pool[Math.floor(Math.random()*pool.length)];let monsterCategory=MONSTER_CATEGORY[monster]||'zako';battle={stage:s,monster,monsterCategory,isBoss,questionNo:0,total:10,correct:0,wrong:0,combo:0,maxCombo:0,playerHp:support?7:5,maxPlayerHp:support?7:5,enemyHp:isBoss?8:5,maxEnemyHp:isBoss?8:5,started:Date.now(),time,locked:false,seen:[],support};el('app').style.backgroundImage=`linear-gradient(#ffffff22,#ffffff88),url('${FANTASY}backgrounds/${s.bg}.webp')`;el('battleTitle').textContent=s.name+(isBoss?'・大ボス戦':'・バトル');el('battleMode').textContent=support?'サポートON':'サポートOFF';el('heroName').textContent=HEROES[state.selectedCharacter][1];el('heroImg').src=`${FANTASY}${HEROES[state.selectedCharacter][2]}.webp`;el('monsterImg').src=`${FANTASY}monsters/${monsterCategory}/${monster}.webp`;el('monsterName').textContent=MONSTER_NAMES[monster]||monster;el('timer').textContent=battle.time;show('battle');nextQuestion();battleClock=setInterval(()=>{if(!battle||battle.locked)return;battle.time--;el('timer').textContent=battle.time;if(battle.time<=0)finishBattle(false,'時間切れ…')},1000)}
-function nextQuestion(){if(!battle)return;if(battle.questionNo>=battle.total||battle.enemyHp<=0){finishBattle(true,'勝利！');return}battle.locked=false;let q;for(let i=0;i<20;i++){q=questionFor(battle.stage.kind);if(!battle.seen.includes(q.id)||i===19)break}battle.q=q;battle.seen.push(q.id);battle.questionNo++;el('question').innerHTML=visualQuestion(q);el('progressText').textContent=`${battle.questionNo} / ${battle.total}`;el('choices').innerHTML=choices(q).map(n=>`<button class="choice" onclick="answer(${n})">${n}</button>`).join('');el('feedback').textContent=''}
-function answer(n){if(!battle||battle.locked)return;battle.locked=true;let q=battle.q,stats=state.learningStats[q.id]||{attempts:0,correct:0,wrong:0,recentResults:[],lastAskedAt:0,lastWrongAt:0,reviewActive:false,reviewCorrectStreak:0};stats.attempts++;stats.lastAskedAt=Date.now();let correct=n===q.answer;stats.recentResults=(stats.recentResults||[]).slice(-4).concat(correct?1:0);if(correct){stats.correct++;stats.reviewCorrectStreak=(stats.reviewCorrectStreak||0)+1;state.totalCorrect++;battle.correct++;battle.combo++;battle.maxCombo=Math.max(battle.maxCombo,battle.combo);state.maxCombo=Math.max(state.maxCombo,battle.maxCombo);let special=battle.combo%5===0;battle.enemyHp=Math.max(0,battle.enemyHp-(special?2:1));el('feedback').textContent=special?'✨ SPECIAL！ せいかい！':'⚔️ ATTACK！ せいかい！';let hero=el('heroImg');hero.src=`${FANTASY}${special?'special/':'attack/'}${HEROES[state.selectedCharacter][3]}-${special?'special':'attack'}.webp`;hero.classList.remove('attack','damage');void hero.offsetWidth;hero.classList.add(special?'attack':'attack');el('monsterImg').classList.add(special?'special':'hit');setTimeout(()=>el('monsterImg').classList.remove('special','hit'),900);if(stats.reviewCorrectStreak>=2)stats.reviewActive=false;gainExp(8)}else{stats.wrong++;stats.lastWrongAt=Date.now();stats.reviewActive=true;stats.reviewCorrectStreak=0;state.totalWrong++;battle.wrong++;battle.combo=0;battle.playerHp--;el('feedback').textContent='💥 もういちど！ こたえは '+q.answer;let hero=el('heroImg');hero.src=`${FANTASY}damage/${HEROES[state.selectedCharacter][3]}-damage.webp`;hero.classList.remove('damage');void hero.offsetWidth;hero.classList.add('damage');if(!state.reviewQueue.includes(q.id))state.reviewQueue.push(q.id);if(battle.playerHp<=0){save();setTimeout(()=>finishBattle(false,'あと少し！ 特訓してもう一度！'),650)}}state.learningStats[q.id]=stats;state.totalAttempts++;save();el('combo').textContent=battle.combo;el('playerHp').style.width=battle.playerHp/battle.maxPlayerHp*100+'%';el('playerHpText').textContent=`${battle.playerHp} / ${battle.maxPlayerHp}`;el('enemyHp').style.width=battle.enemyHp/battle.maxEnemyHp*100+'%';el('enemyHpText').textContent=`HP ${battle.enemyHp} / ${battle.maxEnemyHp}`;if(battle.enemyHp<=0)return setTimeout(()=>finishBattle(true,'勝利！'),850);setTimeout(nextQuestion,correct?600:900)}
+/* ことばの町は、文から式をつくり、答えまで出す二段構えのバトル。 */
+function questionFor(kind){
+ let a,b,item=['🍎','⭐','🍪','🔴'][Math.floor(Math.random()*4)];
+ if(kind==='count'){
+  let mode=Math.random();
+  if(mode<.55){let n=1+Math.floor(Math.random()*10),visual=item.repeat(n);return {id:'count-'+n,text:`${item}が ${n}こ。ぜんぶで いくつ？`,html:`<span class="visual-hint">${visual}</span><span class="question-prompt">なんこ あるかな？</span>`,answer:n,max:10}}
+  if(mode<.75){a=2+Math.floor(Math.random()*8);return {id:`sequence-next-${a}`,text:`${a-1} → ${a} → ❓`,html:`<span class="number-equation">${a-1} → ${a} → ?</span><span class="question-prompt">つぎの かずは？</span>`,answer:a+1,max:10}}
+  if(mode<.88){a=1+Math.floor(Math.random()*8);return {id:`sequence-middle-up-${a}`,text:`${a} → ❓ → ${a+2}`,html:`<span class="number-equation">${a} → ? → ${a+2}</span><span class="question-prompt">まんなかの かずは？</span>`,answer:a+1,max:10}}
+  a=2+Math.floor(Math.random()*8);return {id:`sequence-middle-${a}`,text:`${a+1} → ❓ → ${a-1}`,html:`<span class="number-equation">${a+1} → ? → ${a-1}</span><span class="question-prompt">まんなかの かずは？</span>`,answer:a,max:10};
+ }
+ if(kind==='make10'){a=1+Math.floor(Math.random()*9);return {id:`make10-${a}`,text:`${a}と あわせて 10になる かずは？`,answer:10-a,max:10}}
+ if(kind==='split'){a=2+Math.floor(Math.random()*8);b=Math.floor(Math.random()*(a-1))+1;return {id:`split-${a}-${b}`,text:`${a}は ${b}と いくつ？`,answer:a-b,max:10}}
+ if(kind==='add'){a=Math.floor(Math.random()*9)+1;b=Math.floor(Math.random()*9)+1;return {id:`add-${a}-${b}`,text:`${a} + ${b} = ?`,answer:a+b,max:18}}
+ if(kind==='sub'){a=Math.floor(Math.random()*10)+5;b=Math.floor(Math.random()*5)+1;return {id:`sub-${a}-${b}`,text:`${a} − ${b} = ?`,answer:a-b,max:14}}
+ a=Math.floor(Math.random()*9)+1;b=Math.floor(Math.random()*9)+1;
+ return Math.random()<.5
+  ? {id:`word-add-${a}-${b}`,text:`${item}が ${a}こ。${b}こ もらいました。ぜんぶで？`,emoji:item,answer:a+b,max:18}
+  : {id:`word-sub-${a}-${b}`,text:`${item}が ${a+b}こ。${b}こ たべました。のこりは？`,emoji:item,answer:a,max:18};
+}
+
+function wordStoryLayout(visuals,prompt){return `<span class="visual-hint word-visual">${visuals}</span><span class="question-prompt">${prompt}</span>`}
+function visualQuestion(q){
+ if(q.html)return q.html;
+ let m=q.id.match(/^(make10|split|word-add|word-sub|add|sub)-([0-9]+)(?:-([0-9]+))?/);
+ if(!m)return `<span class="question-prompt">${q.text}</span>`;
+ let type=m[1],a=+m[2],b=+(m[3]||0),e=q.emoji||['🍎','⭐','🍪','🔴'][Math.floor(Math.random()*4)];
+ if(type==='make10')return questionLayout(`${a} ＋ ? ＝ 10`,visualItems(e,a),`${a}こ あるよ。10こに するには あと いくつ？`);
+ if(type==='split')return questionLayout(`${b} ＋ ? ＝ ${a}`,`${visualItems(e,b)}　｜　${visualItems(e,a-b)}`,`${a}を 2つの まとまりに わけよう`);
+ if(type==='add')return questionLayout(`${a} ＋ ${b} ＝ ?`,`${visualItems(e,a)}　＋　${visualItems(e,b)}`,`${a}こ と ${b}こ。あわせて いくつ？`);
+ if(type==='sub')return questionLayout(`${a} − ${b} ＝ ?`,`${visualItems(e,a)}　−　${visualItems(e,b)}`,`${a}こ から ${b}こ へらすと のこりは？`);
+ if(type==='word-add')return wordStoryLayout(`<span>${visualItems(e,a)}</span><span class="word-added">${visualItems(e,b)}</span>`,q.text);
+ if(type==='word-sub')return wordStoryLayout(`<span>${visualItems(e,a+b)}</span><span class="word-taken">${visualItems(e,b)} を たべたよ</span>`,q.text);
+ return `<span class="question-prompt">${q.text}</span>`;
+}
+
+function wordParts(q){
+ let m=q?.id?.match(/^word-(add|sub)-([0-9]+)-([0-9]+)$/);
+ if(!m)return null;
+ let type=m[1],a=+m[2],b=+m[3];
+ return type==='add'?{left:a,operator:'+',right:b}:{left:a+b,operator:'-',right:b};
+}
+function formatWordInput(value){return value.replace('+',' ＋ ').replace('-',' − ')}
+function renderWordControls(){
+ if(!battle||battle.stage.kind!=='word')return;
+ let equation=battle.wordPhase==='equation',value=battle.wordInput||'';
+ let keys=equation?['7','8','9','+','4','5','6','-','1','2','3','back','clear','0']:['1','2','3','4','5','6','7','8','9','clear','0','back'];
+ let label=key=>key==='back'?'⌫':key==='clear'?'C':key==='-'?'−':key;
+ el('choices').innerHTML=`<div class="word-pad ${equation?'equation-pad':'answer-pad'}"><div class="word-step">${equation?'① 式を つくろう':'② こたえを いれよう'}</div><div class="word-input" aria-live="polite">${formatWordInput(value)||'…'}</div><div class="word-keypad">${keys.map(key=>`<button class="word-key ${key==='+'||key==='-'?'operator':''} ${key==='back'||key==='clear'?'utility':''}" onclick="wordKey('${key}')">${label(key)}</button>`).join('')}</div><button class="word-submit ${equation?'blue':'green'}" onclick="submitWordAttack()">⚔️ ${equation?'式で 攻撃！':'答えで 攻撃！'}</button></div>`;
+}
+function wordKey(key){
+ if(!battle||battle.locked||battle.stage.kind!=='word')return;
+ let value=battle.wordInput||'',equation=battle.wordPhase==='equation';
+ if(key==='clear')value='';
+ else if(key==='back')value=value.slice(0,-1);
+ else if(equation&&(key==='+'||key==='-')){
+  if(value&&!/[+-]/.test(value))value+=key;
+  else return;
+ }else if(equation){
+  let current=value.split(/[+-]/).pop();
+  if(current.length<2&&value.length<5)value+=key;
+ }else if(value.length<2)value+=key;
+ battle.wordInput=value;
+ renderWordControls();
+}
+function updateBattleHud(){
+ if(!battle)return;
+ el('combo').textContent=battle.combo;
+ el('playerHp').style.width=battle.playerHp/battle.maxPlayerHp*100+'%';
+ el('playerHpText').textContent=`${battle.playerHp} / ${battle.maxPlayerHp}`;
+ el('enemyHp').style.width=battle.enemyHp/battle.maxEnemyHp*100+'%';
+ el('enemyHpText').textContent=`HP ${battle.enemyHp} / ${battle.maxEnemyHp}`;
+}
+function performAttack(){
+ battle.correct++;
+ battle.combo++;
+ battle.maxCombo=Math.max(battle.maxCombo,battle.combo);
+ state.maxCombo=Math.max(state.maxCombo,battle.maxCombo);
+ let special=battle.combo%5===0;
+ battle.enemyHp=Math.max(0,battle.enemyHp-(special?2:1));
+ let hero=el('heroImg');
+ hero.src=`${FANTASY}${special?'special/':'attack/'}${HEROES[state.selectedCharacter][3]}-${special?'special':'attack'}.webp`;
+ hero.classList.remove('attack','damage');void hero.offsetWidth;hero.classList.add('attack');
+ let monster=el('monsterImg');
+ monster.classList.remove('special','hit');void monster.offsetWidth;monster.classList.add(special?'special':'hit');
+ setTimeout(()=>monster.classList.remove('special','hit'),900);
+ return special;
+}
+function submitWordAttack(){
+ if(!battle||battle.locked||battle.stage.kind!=='word')return;
+ let value=battle.wordInput||'';
+ if(!value){el('feedback').textContent=battle.wordPhase==='equation'?'数字と ＋ または − を おして、式を つくろう。':'数字を おして、答えを いれよう。';return}
+ if(battle.wordPhase==='equation'){
+  let entered=value.match(/^(\d{1,2})([+-])(\d{1,2})$/),parts=wordParts(battle.q);
+  if(!entered){el('feedback').textContent='「3 ＋ 2」のように、数字と きごうで 式を つくろう。';return}
+  let left=+entered[1],operator=entered[2],right=+entered[3];
+  let correct=parts&&operator===parts.operator&&((operator==='+'&&((left===parts.left&&right===parts.right)||(left===parts.right&&right===parts.left)))||(operator==='-'&&left===parts.left&&right===parts.right));
+  if(!correct){answer(Number.NaN,true,'💥 文を もう一度 よんで、式を つくろう。');return}
+  battle.locked=true;
+  let special=performAttack();
+  beep(special?'special':'correct');
+  updateBattleHud();
+  el('feedback').textContent=special?'✨ SPECIAL！ 式が できた！ つぎは答えで 攻撃！':'⚔️ 式で ATTACK！ つぎは答えで 攻撃！';
+  let q=battle.q;
+  setTimeout(()=>{
+   if(!battle||battle.q!==q||battle.wordPhase!=='equation')return;
+   battle.wordPhase='answer';battle.wordInput='';battle.locked=false;renderWordControls();
+  },600);
+  return;
+ }
+ answer(Number(value),true);
+}
+
+function startBattle(stageId){
+ if(battleClock){clearInterval(battleClock);battleClock=null}
+ let s=STAGES.find(x=>x.id===stageId)||STAGES[0],support=state.supportMode,isBoss=stageId==='unit6',isMid=stageId==='unit5';
+ let time=isBoss?(support?160:120):isMid?(support?120:90):(support?90:60);
+ let stageIndex=STAGES.findIndex(x=>x.id===stageId),pool=isBoss?BOSS:isMid?MID:(ZAKO_STAGE_POOLS[stageIndex]||ZAKO);
+ let monster=pool[Math.floor(Math.random()*pool.length)],monsterCategory=MONSTER_CATEGORY[monster]||'zako',maxEnemyHp=isBoss?16:5;
+ battle={stage:s,monster,monsterCategory,isBoss,questionNo:0,total:10,correct:0,wrong:0,combo:0,maxCombo:0,playerHp:support?7:5,maxPlayerHp:support?7:5,enemyHp:maxEnemyHp,maxEnemyHp,started:Date.now(),time,locked:false,seen:[],support,wordPhase:s.kind==='word'?'equation':null,wordInput:''};
+ el('app').style.backgroundImage=`linear-gradient(#ffffff22,#ffffff88),url('${FANTASY}backgrounds/${s.bg}.webp')`;
+ el('battleTitle').textContent=s.name+(isBoss?'・大ボス戦':'・バトル');
+ el('battleMode').textContent=support?'サポートON':'サポートOFF';
+ el('heroName').textContent=HEROES[state.selectedCharacter][1];
+ el('heroImg').src=`${FANTASY}${HEROES[state.selectedCharacter][2]}.webp`;
+ el('monsterImg').src=`${FANTASY}monsters/${monsterCategory}/${monster}.webp`;
+ el('monsterName').textContent=MONSTER_NAMES[monster]||monster;
+ el('timer').textContent=battle.time;
+ show('battle');updateBattleHud();nextQuestion();
+ battleClock=setInterval(()=>{if(!battle||battle.locked)return;battle.time--;el('timer').textContent=battle.time;if(battle.time<=0)finishBattle(false,'時間切れ…')},1000);
+}
+function nextQuestion(){
+ if(!battle)return;
+ if(battle.enemyHp<=0||(!battle.isBoss&&battle.questionNo>=battle.total)){finishBattle(true,'勝利！');return}
+ battle.locked=false;
+ let q;
+ for(let i=0;i<20;i++){q=questionFor(battle.stage.kind);if(!battle.seen.includes(q.id)||i===19)break}
+ battle.q=q;battle.seen.push(q.id);battle.questionNo++;
+ el('question').innerHTML=visualQuestion(q);
+ el('progressText').textContent=battle.isBoss?`第 ${battle.questionNo}問`:`${battle.questionNo} / ${battle.total}`;
+ el('feedback').textContent='';
+ if(battle.stage.kind==='word'){battle.wordPhase='equation';battle.wordInput='';renderWordControls()}
+ else el('choices').innerHTML=choices(q).map(n=>`<button class="choice" onclick="answer(${n})">${n}</button>`).join('');
+}
+function answer(n,fromPad=false,wrongMessage=''){
+ if(!battle||battle.locked)return;
+ battle.locked=true;
+ let q=battle.q,stats=state.learningStats[q.id]||{attempts:0,correct:0,wrong:0,recentResults:[],lastAskedAt:0,lastWrongAt:0,reviewActive:false,reviewCorrectStreak:0};
+ stats.attempts++;stats.lastAskedAt=Date.now();
+ let correct=n===q.answer;
+ if(fromPad)beep(correct?'correct':'wrong');
+ stats.recentResults=(stats.recentResults||[]).slice(-4).concat(correct?1:0);
+ if(correct){
+  stats.correct++;stats.reviewCorrectStreak=(stats.reviewCorrectStreak||0)+1;
+  state.totalCorrect++;
+  let special=performAttack();
+  el('feedback').textContent=special?'✨ SPECIAL！ せいかい！':'⚔️ ATTACK！ せいかい！';
+  if(stats.reviewCorrectStreak>=2)stats.reviewActive=false;
+  gainExp(8);
+ }else{
+  stats.wrong++;stats.lastWrongAt=Date.now();stats.reviewActive=true;stats.reviewCorrectStreak=0;
+  state.totalWrong++;battle.wrong++;battle.combo=0;battle.playerHp--;
+  el('feedback').textContent=wrongMessage||('💥 もういちど！ こたえは '+q.answer);
+  let hero=el('heroImg');
+  hero.src=`${FANTASY}damage/${HEROES[state.selectedCharacter][3]}-damage.webp`;
+  hero.classList.remove('damage');void hero.offsetWidth;hero.classList.add('damage');
+  if(!state.reviewQueue.includes(q.id))state.reviewQueue.push(q.id);
+  if(battle.playerHp<=0){save();setTimeout(()=>finishBattle(false,'あと少し！ 特訓してもう一度！'),650)}
+ }
+ state.learningStats[q.id]=stats;state.totalAttempts++;save();updateBattleHud();
+ if(battle.enemyHp<=0)return setTimeout(()=>finishBattle(true,'勝利！'),850);
+ if(battle.playerHp<=0)return;
+ setTimeout(nextQuestion,correct?600:900);
+}
+
 function gainExp(n){state.exp+=n;while(state.exp>=state.playerLevel*100){state.exp-=state.playerLevel*100;state.playerLevel++}}
-function finishBattle(won,message){if(!battle||battle.finished)return;battle.finished=true;clearInterval(battleClock);battleClock=null;let s=battle.stage,p=state.stageProgress[s.id]||{attempts:0,clears:0},previousStage=state.lastStage;p.attempts=(p.attempts||0)+1;if(won){p.clears=(p.clears||0)+1;p.cleared=true;state.clearCount++;let repeat=s.id===previousStage?state.repeatCount+1:0;state.lastStage=s.id;state.repeatCount=repeat;let reward=repeat>=3?4:12;gainExp(reward);let key=battle.monster;state.monsterBook[key]=true;state.monsterDefeatCounts[key]=(state.monsterDefeatCounts[key]||0)+1;let unopened=COLLECTIONS.filter(x=>!state.collections.includes(x[0]));if(unopened.length){let badge=unopened[Math.floor(Math.random()*unopened.length)];state.collections.push(badge[0])}if(battle.isBoss)state.bossProgress[s.id]=true}state.stageProgress[s.id]=p;save();el('overlay').innerHTML=`<div class="battle-overlay"><div class="result-card"><div class="navis">${HEROES.slice(0,3).map(x=>`<img src="${NAVI}characters/${x[0]}/expressions/08-celebrating.webp">`).join('')}</div><h2>${message}</h2><p>正解 ${battle.correct}問　ミス ${battle.wrong}問<br>最大コンボ ${battle.maxCombo}　残りHP ${Math.max(0,battle.playerHp)}</p><p>${won?'EXPとコレクションを うけとったよ！':'まちがいは 特訓に 記録したよ。'}</p><div class="result-actions"><button class="green" onclick="closeOverlay();startTraining('wrong')">まちがえた問題を特訓する</button><button class="blue" onclick="closeOverlay();startBattle('${s.id}')">もう一度バトル</button><button class="orange" onclick="closeOverlay();show('map')">学習マップを見る</button><button class="back" onclick="closeOverlay();show('home')">ホームへ</button></div></div></div>`}
+function finishBattle(won,message){if(!battle||battle.finished)return;battle.finished=true;clearInterval(battleClock);battleClock=null;let s=battle.stage,p=state.stageProgress[s.id]||{attempts:0,clears:0},previousStage=state.lastStage;p.attempts=(p.attempts||0)+1;if(won){p.clears=(p.clears||0)+1;p.cleared=true;state.clearCount++;let repeat=s.id===previousStage?state.repeatCount+1:0;state.lastStage=s.id;state.repeatCount=repeat;let reward=repeat>=3?4:12;gainExp(reward);let key=battle.monster;state.monsterBook[key]=true;state.monsterDefeatCounts[key]=(state.monsterDefeatCounts[key]||0)+1;let unopened=COLLECTIONS.filter(x=>!state.collections.includes(x[0]));if(unopened.length){let badge=unopened[Math.floor(Math.random()*unopened.length)];state.collections.push(badge[0])}if(battle.isBoss)state.bossProgress[s.id]=true}state.stageProgress[s.id]=p;save();el('overlay').innerHTML=`<div class="battle-overlay"><div class="result-card"><div class="navis">${HEROES.slice(0,3).map(x=>`<img src="${NAVI}characters/${x[0]}/expressions/08-celebrating.webp">`).join('')}</div><h2>${message}</h2><p>${battle.isBoss?'成功攻撃 '+battle.correct+'回　ミス '+battle.wrong+'回':'正解 '+battle.correct+'問　ミス '+battle.wrong+'問'}<br>最大コンボ ${battle.maxCombo}　残りHP ${Math.max(0,battle.playerHp)}</p><p>${won?'EXPとコレクションを うけとったよ！':'まちがいは 特訓に 記録したよ。'}</p><div class="result-actions"><button class="green" onclick="closeOverlay();startTraining('wrong')">まちがえた問題を特訓する</button><button class="blue" onclick="closeOverlay();startBattle('${s.id}')">もう一度バトル</button><button class="orange" onclick="closeOverlay();show('map')">学習マップを見る</button><button class="back" onclick="closeOverlay();show('home')">ホームへ</button></div></div></div>`}
 function closeOverlay(){clearInterval(battleClock);battleClock=null;el('overlay').innerHTML='';battle=null;el('app').style.backgroundImage="linear-gradient(#ffffff22,#ffffff88),url('https://tt-sensei.github.io/navi-character-/assets/web/fantasy/backgrounds/town.webp')"}
 let trainingMode='auto',trainingQ;
 function startTraining(mode){if(mode)trainingMode=mode;show('training');let ids=trainingMode==='wrong'?state.reviewQueue.filter(id=>state.learningStats[id]?.reviewActive):[];let source=ids.length?ids[Math.floor(Math.random()*ids.length)]:null;trainingQ=source?questionFromId(source):questionFor(STAGES[Math.floor(Math.random()*STAGES.length)].kind);el('trainingQuestion').innerHTML=visualQuestion(trainingQ);el('trainingFeedback').textContent='';el('trainingChoices').innerHTML=choices(trainingQ).map(n=>`<button class="choice" onclick="trainingAnswer(${n})">${n}</button>`).join('')}
-function questionFromId(id){let m=id.match(/^(word-add|word-sub|add|sub|make10|split|count)-([0-9]+)(?:-([0-9]+))?/);if(!m)return questionFor('count');let type=m[1],a=+m[2],b=+(m[3]||0);if(type==='add')return {id,text:`${a} + ${b} = ?`,answer:a+b,max:18};if(type==='sub')return {id,text:`${a} − ${b} = ?`,answer:a-b,max:14};if(type==='word-add')return {id,text:`りんごが ${a}こ。${b}こ もらいました。ぜんぶで？`,answer:a+b,max:18};if(type==='word-sub')return {id,text:`りんごが ${a+b}こ。${b}こ たべました。のこりは？`,answer:a,max:18};if(type==='make10')return {id,text:`${a}と あわせて 10になる かずは？`,answer:10-a,max:10};if(type==='split')return {id,text:`${a}は ${b}と いくつ？`,answer:a-b,max:10};let item='🍎',visual=item.repeat(a);return {id,text:`${item}が ${a}こ。ぜんぶで いくつ？`,html:`<span class="visual-hint">${visual}</span><span class="question-prompt">なんこ あるかな？</span>`,answer:a,max:10}}
+function questionFromId(id){let m=id.match(/^(word-add|word-sub|add|sub|make10|split|count)-([0-9]+)(?:-([0-9]+))?/);if(!m)return questionFor('count');let type=m[1],a=+m[2],b=+(m[3]||0);if(type==='add')return {id,text:`${a} + ${b} = ?`,answer:a+b,max:18};if(type==='sub')return {id,text:`${a} − ${b} = ?`,answer:a-b,max:14};if(type==='word-add')return {id,text:`🍎が ${a}こ。${b}こ もらいました。ぜんぶで？`,emoji:'🍎',answer:a+b,max:18};if(type==='word-sub')return {id,text:`🍎が ${a+b}こ。${b}こ たべました。のこりは？`,emoji:'🍎',answer:a,max:18};if(type==='make10')return {id,text:`${a}と あわせて 10になる かずは？`,answer:10-a,max:10};if(type==='split')return {id,text:`${a}は ${b}と いくつ？`,answer:a-b,max:10};let item='🍎',visual=item.repeat(a);return {id,text:`${item}が ${a}こ。ぜんぶで いくつ？`,html:`<span class="visual-hint">${visual}</span><span class="question-prompt">なんこ あるかな？</span>`,answer:a,max:10}}
 function trainingAnswer(n){let correct=n===trainingQ.answer;el('trainingFeedback').textContent=correct?'🌟 できた！ あとで もういちど でてくるよ。':'🍀 だいじょうぶ。こたえは '+trainingQ.answer;let s=state.learningStats[trainingQ.id]||{attempts:0,correct:0,wrong:0,recentResults:[],reviewActive:false,reviewCorrectStreak:0};s.attempts++;if(correct){s.correct++;s.reviewCorrectStreak=(s.reviewCorrectStreak||0)+1;if(s.reviewCorrectStreak>=2)s.reviewActive=false;gainExp(2)}else{s.wrong++;s.reviewActive=true;s.reviewCorrectStreak=0;if(!state.reviewQueue.includes(trainingQ.id))state.reviewQueue.push(trainingQ.id)}state.learningStats[trainingQ.id]=s;save();setTimeout(startTraining,650)}
 function renderMap(){el('mapRows').innerHTML=STAGES.map(s=>{let p=state.stageProgress[s.id]||{},stats=Object.entries(state.learningStats).filter(([id])=>id.startsWith(s.kind));let a=stats.reduce((n,[,v])=>n+v.attempts,0),c=stats.reduce((n,[,v])=>n+v.correct,0),rate=a?Math.round(c/a*100):0,weak=stats.filter(([,v])=>v.reviewActive).length;return `<div class="map-row"><strong>${s.name}</strong><span class="tag ${rate>=80?'good':a?'warn':''}">${a?rate+'%':'－ データ不足'}</span><span>${p.cleared?'👑 MASTER':'未クリア'}</span><span class="map-extra">苦手 ${weak}問　${weak?'△ 特訓おすすめ':'○ もう少し'}</span></div>`}).join('')}
 const STICKER_EFFECTS=['holo','rainbow','glitter','neon','aurora','prism'];
